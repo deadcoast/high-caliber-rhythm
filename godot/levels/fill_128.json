@@ -1,0 +1,57 @@
+{
+  "name": "fill_128",
+  "bpm": 128.0,
+  "lead_in": 8.0,
+  "sections": [
+    {
+      "pattern": "flick_quad",
+      "repeats": 2
+    },
+    {
+      "pattern": "switch_pair",
+      "repeats": 1
+    },
+    {
+      "pattern": "rush_fill",
+      "repeats": 1
+    },
+    {
+      "pattern": "micro_zigzag",
+      "repeats": 2
+    },
+    {
+      "pattern": "track_sweep",
+      "repeats": 1
+    },
+    {
+      "pattern": "rush_fill",
+      "repeats": 1
+    },
+    {
+      "pattern": "flick_8ths",
+      "repeats": 2
+    },
+    {
+      "pattern": "switch_pair",
+      "repeats": 1
+    },
+    {
+      "pattern": "rush_fill",
+      "repeats": 1
+    },
+    {
+      "pattern": "rest",
+      "repeats": 1
+    }
+  ],
+  "scaling": {
+    "ref_bpm": 128.0,
+    "radius_exp": 0.0
+  },
+  "patterns": [],
+  "audio": "",
+  "stems": [],
+  "song_offset_s": 0.0,
+  "drum_stem": -1,
+  "kit": {}
+}

@@ -1,0 +1,39 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; but it still can be edited manually.
+
+config_version=5
+
+[application]
+
+config/name="DOWNBEAT"
+config/description="Cel-shaded cyberpunk FPS rhythm game and aim trainer. Greybox build."
+run/main_scene="res://scenes/main.tscn"
+run/max_fps=0
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[autoload]
+
+Settings="*res://src/core/settings.gd"
+DB="*res://src/core/db.gd"
+Scores="*res://src/core/scores.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/vsync/vsync_mode=0
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=false
+
+[physics]
+
+common/physics_ticks_per_second=120
+3d/default_gravity=18.0
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=2

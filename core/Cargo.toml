@@ -1,0 +1,33 @@
+[package]
+name = "downbeat-core"
+version = "0.1.0"
+edition = "2021"
+description = "Engine-independent game model for DOWNBEAT: beat clock, BPM-space charts, timing judge, scoring, simulation."
+license = "UNLICENSED"
+
+[lib]
+name = "downbeat_core"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "dbsim"
+path = "src/bin/dbsim.rs"
+
+[[bin]]
+name = "dbmap"
+path = "src/bin/dbmap.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+rustfft = "6"
+hound = "3"
+godot = { version = "0.5", optional = true, features = ["api-4-7"] }
+
+[features]
+default = []
+gdext = ["dep:godot"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"

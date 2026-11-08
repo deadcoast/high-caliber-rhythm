@@ -1,0 +1,3 @@
+max-line-length: 140
+disable:
+  - class-definitions-order
