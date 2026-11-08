@@ -8,9 +8,9 @@
 //!   dbsim --jitter 35 --bias 20 --seed 3
 //!   dbsim --level-json 128 > ../godot/levels/warmup_128.json
 
-use downbeat_core::patterns::{fill_level, warmup_level};
-use downbeat_core::score::Report;
-use downbeat_core::sim::{run_level, Bot, SimConfig, SimResult};
+use highcal_core::patterns::{fill_level, warmup_level};
+use highcal_core::score::Report;
+use highcal_core::sim::{run_level, Bot, SimConfig, SimResult};
 use std::io::Write;
 
 struct Args {
@@ -92,7 +92,7 @@ fn print_run(bpm: f64, r: &SimResult) {
     let row = |s: String| println!("| {:<W$} |", s);
     let rep: &Report = &r.report;
     println!("+{rule}+");
-    row(format!("DOWNBEAT  {} @ {bpm:.0} BPM     grade {}     score {}", r.name, rep.grade.label(), rep.score));
+    row(format!("highcal  {} @ {bpm:.0} BPM     grade {}     score {}", r.name, rep.grade.label(), rep.score));
     println!("+{rule}+");
     let judged = (rep.hits + rep.expired).max(1) as f64;
     let rows = [

@@ -7,10 +7,10 @@
 //!   dbmap song.wav --bpm 128 --offset 0.35  override detection (keep the analysis printout)
 //!   dbmap song.wav --auto                   pick each bar's pattern from the song's own energy
 
-use downbeat_core::analysis::{analyze, bar_energy, read_wav_mono, synth_track_sections, Analysis, HOP, ONSET_LAG_SAMPLES};
-use downbeat_core::chart::{compile, Level, Scaling, Section};
-use downbeat_core::patterns::builtin_lib;
-use downbeat_core::rating::rate;
+use highcal_core::analysis::{analyze, bar_energy, read_wav_mono, synth_track_sections, Analysis, HOP, ONSET_LAG_SAMPLES};
+use highcal_core::chart::{compile, Level, Scaling, Section};
+use highcal_core::patterns::builtin_lib;
+use highcal_core::rating::rate;
 use std::io::Write;
 
 /// Patterns by intensity for `--auto`. A bar's rank among the song's bars

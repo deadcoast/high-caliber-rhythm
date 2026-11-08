@@ -1,10 +1,10 @@
-use downbeat_core::chart::{compile, Kind, Level, Scaling, Section};
-use downbeat_core::clock::{ClockConfig, ClockEvent, Conductor};
-use downbeat_core::judge::{Hit, Judge, Shot, Timing, Verdict, Windows};
-use downbeat_core::patterns::{builtin_lib, warmup_level};
-use downbeat_core::score::{Grade, Scoring, Session};
-use downbeat_core::sim::{run_level, Bot, SimConfig};
-use downbeat_core::Game;
+use highcal_core::chart::{compile, Kind, Level, Scaling, Section};
+use highcal_core::clock::{ClockConfig, ClockEvent, Conductor};
+use highcal_core::judge::{Hit, Judge, Shot, Timing, Verdict, Windows};
+use highcal_core::patterns::{builtin_lib, warmup_level};
+use highcal_core::score::{Grade, Scoring, Session};
+use highcal_core::sim::{run_level, Bot, SimConfig};
+use highcal_core::Game;
 
 fn approx(a: f64, b: f64, eps: f64) -> bool {
     (a - b).abs() <= eps
@@ -417,7 +417,7 @@ fn game_facade_applies_input_offset_and_song_offset() {
     let mut t = 0.0;
     while t < 0.8 {
         for e in g.update(0.01, None) {
-            if let downbeat_core::GameEvent::Judge(Verdict::Spawn { target: 0 }) = e {
+            if let highcal_core::GameEvent::Judge(Verdict::Spawn { target: 0 }) = e {
                 spawned = true;
                 assert!(t >= 0.74, "spawned at stream time {t}");
             }
@@ -499,7 +499,7 @@ fn replay_reproduces_the_live_report_exactly() {
         let replay = r.replay.expect("game built from a level records a replay");
         assert!(replay.inputs.len() >= r.report.shots as usize);
         let json = replay.to_json();
-        let back = downbeat_core::replay::Replay::from_json(&json).unwrap();
+        let back = highcal_core::replay::Replay::from_json(&json).unwrap();
         let replayed = back.play().unwrap();
         assert_eq!(replayed, r.report, "bpm {bpm} seed {seed}");
     }
@@ -521,7 +521,7 @@ fn report_history_matches_counts() {
 
 #[test]
 fn analyser_recovers_tempo_and_offset_from_synthetic_music() {
-    use downbeat_core::analysis::{analyze, synth_track};
+    use highcal_core::analysis::{analyze, synth_track};
     for (bpm, offset, secs) in [(140.0, 0.42, 30.0), (92.0, 0.11, 45.0), (183.5, 0.05, 25.0), (128.0, 0.31, 40.0)] {
         let s = synth_track(bpm, offset, secs, 44_100, 3);
         let a = analyze(&s, 44_100);
@@ -534,7 +534,7 @@ fn analyser_recovers_tempo_and_offset_from_synthetic_music() {
 
 #[test]
 fn analyser_handles_silence_and_short_input() {
-    use downbeat_core::analysis::analyze;
+    use highcal_core::analysis::analyze;
     let a = analyze(&vec![0.0f32; 44_100], 44_100);
     assert_eq!(a.bpm, 0.0);
     let b = analyze(&[0.0f32; 10], 44_100);
@@ -546,7 +546,7 @@ fn analyser_handles_silence_and_short_input() {
 
 #[test]
 fn rating_anchor_and_tempo_monotonic() {
-    use downbeat_core::rating::rate;
+    use highcal_core::rating::rate;
     let r128 = rate(&compile(&warmup_level(128.0), &builtin_lib()).unwrap());
     assert!((r128.stars - 3.0).abs() < 0.02, "anchor drifted: {}", r128.stars);
     let r90 = rate(&compile(&warmup_level(90.0), &builtin_lib()).unwrap());
@@ -559,10 +559,10 @@ fn rating_anchor_and_tempo_monotonic() {
 
 #[test]
 fn rating_rises_when_targets_shrink_and_is_zero_for_rest() {
-    use downbeat_core::rating::rate;
+    use highcal_core::rating::rate;
     // Same patterns at half radius, overriding the builtins inline.
     let mut half = warmup_level(128.0);
-    for p in downbeat_core::patterns::builtin_patterns() {
+    for p in highcal_core::patterns::builtin_patterns() {
         let mut q = p.clone();
         for e in &mut q.events {
             e.radius *= 0.5;
@@ -583,7 +583,7 @@ fn rating_rises_when_targets_shrink_and_is_zero_for_rest() {
 
 #[test]
 fn bar_energy_reads_a_quiet_intro_as_quiet() {
-    use downbeat_core::analysis::{analyze, bar_energy, synth_track_sections};
+    use highcal_core::analysis::{analyze, bar_energy, synth_track_sections};
     let s = synth_track_sections(128.0, 0.2, 40.0, 44_100, 3, 6);
     let a = analyze(&s, 44_100);
     assert!((a.bpm - 128.0).abs() < 0.05);
@@ -599,12 +599,12 @@ fn bar_energy_reads_a_quiet_intro_as_quiet() {
 
 #[test]
 fn replay_refuses_a_changed_chart() {
-    use downbeat_core::replay::ReplayError;
+    use highcal_core::replay::ReplayError;
     let r = run_level(&warmup_level(128.0), Bot::perfect(), SimConfig::default());
     let mut replay = r.replay.unwrap();
     assert_eq!(replay.play().unwrap(), r.report);
     // Tamper with the level: one pattern overridden inline with a wider target.
-    let mut p = downbeat_core::patterns::builtin_lib()["flick_lr"].clone();
+    let mut p = highcal_core::patterns::builtin_lib()["flick_lr"].clone();
     p.events[0].radius = 0.9;
     replay.level.patterns.push(p);
     match replay.play() {
@@ -624,8 +624,8 @@ fn replay_refuses_a_changed_chart() {
 
 #[test]
 fn rush_fill_pattern_and_fill_level() {
-    use downbeat_core::patterns::fill_level;
-    use downbeat_core::rating::rate;
+    use highcal_core::patterns::fill_level;
+    use highcal_core::rating::rate;
     let lib = builtin_lib();
     let p = &lib["rush_fill"];
     let rushes: Vec<_> = p.events.iter().filter(|e| e.kind == Kind::Rush).collect();
