@@ -75,11 +75,13 @@ pub struct SimConfig {
     pub audio_clock: bool,
     /// Pre-roll before beat 0 in seconds.
     pub preroll_s: f64,
+    /// Wall-clock cap in simulated seconds; restarts can otherwise loop forever.
+    pub max_wall_s: f64,
 }
 
 impl Default for SimConfig {
     fn default() -> Self {
-        Self { seed: 7, frame_dt: 1.0 / 240.0, audio_chunk_s: 512.0 / 44_100.0, audio_clock: true, preroll_s: 1.0 }
+        Self { seed: 7, frame_dt: 1.0 / 240.0, audio_chunk_s: 512.0 / 44_100.0, audio_clock: true, preroll_s: 1.0, max_wall_s: 1800.0 }
     }
 }
 
@@ -93,6 +95,7 @@ pub struct SimResult {
     pub bars: u64,
     pub spawns: u32,
     pub snaps: u32,
+    pub restarts: u32,
     pub max_abs_drift_ms: f64,
     pub rms_drift_ms: f64,
     pub verdicts: Vec<Verdict>,
@@ -132,6 +135,8 @@ pub fn run_game(mut game: Game, bot: Bot, cfg: SimConfig) -> SimResult {
     game.start(real);
 
     let mut frames = 0u64;
+    let mut restarts = 0u32;
+    let mut wall = 0.0f64;
     let (mut ticks, mut beats, mut bars, mut spawns) = (0u64, 0u64, 0u64, 0u32);
     let mut live_tracks: Vec<u32> = Vec::new();
     let mut verdicts = Vec::new();
@@ -139,9 +144,11 @@ pub fn run_game(mut game: Game, bot: Bot, cfg: SimConfig) -> SimResult {
     let mut drift_n = 0.0;
     let mut max_drift: f64 = 0.0;
 
-    while real < total {
+    // Restarts rewind `real`; cap the wall clock so a bot that never kills ends.
+    while real < total && wall < cfg.max_wall_s {
         let prev = real;
         real += cfg.frame_dt;
+        wall += cfg.frame_dt;
         frames += 1;
         let audio = if cfg.audio_clock && real >= 0.0 {
             // Mixer reports the last completed chunk plus a sub-chunk estimate
@@ -163,6 +170,7 @@ pub fn run_game(mut game: Game, bot: Bot, cfg: SimConfig) -> SimResult {
                 }
                 GameEvent::Clock(ClockEvent::Beat { .. }) => beats += 1,
                 GameEvent::Clock(ClockEvent::Bar { .. }) => bars += 1,
+                GameEvent::Cue(_) => {}
                 GameEvent::Judge(v) => {
                     match &v {
                         Verdict::Spawn { target } => {
@@ -172,6 +180,23 @@ pub fn run_game(mut game: Game, bot: Bot, cfg: SimConfig) -> SimResult {
                             }
                         }
                         Verdict::TrackDone { target, .. } => live_tracks.retain(|t| t != target),
+                        Verdict::Restart { segment, .. } => {
+                            // The section replays: the bot gets another go at
+                            // every target in it, with fresh error and fresh luck.
+                            live_tracks.clear();
+                            for (i, p) in plans.iter_mut().enumerate() {
+                                let t = &game.chart().targets[i];
+                                if t.segment == *segment {
+                                    let err = bot.bias_ms + bot.jitter_ms * rng.normal();
+                                    p.time = t.hit_time + err / 1000.0;
+                                    p.fired = t.kind == Kind::Track;
+                                    p.skip = t.kind != Kind::Track && rng.unit() < bot.skip_prob;
+                                }
+                            }
+                            // Real time continues; chart time went back. Track the model's clock.
+                            real = game.conductor().song_time();
+                            restarts += 1;
+                        }
                         _ => {}
                     }
                     verdicts.push(v);
@@ -217,6 +242,7 @@ pub fn run_game(mut game: Game, bot: Bot, cfg: SimConfig) -> SimResult {
         bars,
         spawns,
         snaps: game.conductor().snap_count(),
+        restarts,
         max_abs_drift_ms: max_drift,
         rms_drift_ms: if drift_n > 0.0 { (drift_sq / drift_n).sqrt() } else { 0.0 },
         verdicts,

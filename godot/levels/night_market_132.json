@@ -1,0 +1,756 @@
+{
+  "name": "night_market_132",
+  "song": "Night Market",
+  "artist": "DOWNBEAT (placeholder track)",
+  "difficulty": "Normal",
+  "charter": "hand chart, editor format",
+  "bpm": 132.0,
+  "lead_in": 8.0,
+  "sections": [],
+  "segments": [
+    {
+      "type": "traversal",
+      "bars": 6.0
+    },
+    {
+      "type": "encounter",
+      "room": "street",
+      "sections": [
+        {
+          "pattern": "micro_walk",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_lr",
+          "repeats": 2
+        },
+        {
+          "pattern": "micro_zigzag",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_lr",
+          "repeats": 1
+        },
+        {
+          "pattern": "roll_bar",
+          "repeats": 1
+        },
+        {
+          "pattern": "flick_quad",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_lr",
+          "repeats": 2
+        },
+        {
+          "pattern": "track_sweep",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_quad",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_8ths",
+          "repeats": 1
+        },
+        {
+          "pattern": "rest",
+          "repeats": 1
+        }
+      ]
+    },
+    {
+      "type": "traversal",
+      "bars": 2.0
+    },
+    {
+      "type": "encounter",
+      "room": "atrium",
+      "sections": [
+        {
+          "pattern": "chorus_hook",
+          "repeats": 1
+        },
+        {
+          "pattern": "chorus_answer",
+          "repeats": 1
+        },
+        {
+          "pattern": "chorus_hook",
+          "repeats": 1
+        },
+        {
+          "pattern": "chorus_answer",
+          "repeats": 1
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "track_arc",
+          "repeats": 2
+        },
+        {
+          "pattern": "chorus_hook",
+          "repeats": 1
+        },
+        {
+          "pattern": "chorus_answer",
+          "repeats": 1
+        },
+        {
+          "pattern": "flick_8ths",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "rush_fill",
+          "repeats": 1
+        },
+        {
+          "pattern": "rest",
+          "repeats": 1
+        }
+      ]
+    },
+    {
+      "type": "traversal",
+      "bars": 6.0
+    },
+    {
+      "type": "encounter",
+      "room": "platform",
+      "sections": [
+        {
+          "pattern": "rest",
+          "repeats": 2
+        },
+        {
+          "pattern": "micro_walk",
+          "repeats": 2
+        },
+        {
+          "pattern": "micro_zigzag",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_lr",
+          "repeats": 2
+        },
+        {
+          "pattern": "track_sweep",
+          "repeats": 1
+        },
+        {
+          "pattern": "roll_bar",
+          "repeats": 1
+        },
+        {
+          "pattern": "rush_fill",
+          "repeats": 1
+        },
+        {
+          "pattern": "flick_8ths",
+          "repeats": 2
+        },
+        {
+          "pattern": "drop_cross",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "chorus_hook",
+          "repeats": 1
+        },
+        {
+          "pattern": "chorus_answer",
+          "repeats": 1
+        },
+        {
+          "pattern": "track_arc",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_quad",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_8ths",
+          "repeats": 1
+        },
+        {
+          "pattern": "rush_fill",
+          "repeats": 1
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 1
+        }
+      ]
+    },
+    {
+      "type": "traversal",
+      "bars": 4.0
+    }
+  ],
+  "rooms": [
+    {
+      "name": "street",
+      "origin": null,
+      "size": [
+        30.0,
+        9.0,
+        40.0
+      ],
+      "stand": [
+        0.0,
+        0.0,
+        14.0
+      ],
+      "yaw_deg": 0.0,
+      "blocks": [
+        {
+          "pos": [
+            -6.0,
+            0.6,
+            2.0
+          ],
+          "size": [
+            3.0,
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "pos": [
+            6.0,
+            0.6,
+            2.0
+          ],
+          "size": [
+            3.0,
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "pos": [
+            -10.0,
+            1.0,
+            -6.0
+          ],
+          "size": [
+            2.0,
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "pos": [
+            10.0,
+            1.0,
+            -6.0
+          ],
+          "size": [
+            2.0,
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "pos": [
+            0.0,
+            1.3,
+            -12.0
+          ],
+          "size": [
+            5.0,
+            2.6,
+            2.4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "atrium",
+      "origin": null,
+      "size": [
+        26.0,
+        16.0,
+        30.0
+      ],
+      "stand": [
+        0.0,
+        0.0,
+        10.0
+      ],
+      "yaw_deg": 0.0,
+      "blocks": [
+        {
+          "pos": [
+            -9.0,
+            4.0,
+            -8.0
+          ],
+          "size": [
+            4.0,
+            0.4,
+            4.0
+          ]
+        },
+        {
+          "pos": [
+            9.0,
+            4.0,
+            -8.0
+          ],
+          "size": [
+            4.0,
+            0.4,
+            4.0
+          ]
+        },
+        {
+          "pos": [
+            0.0,
+            3.0,
+            -4.0
+          ],
+          "size": [
+            1.6,
+            6.0,
+            1.6
+          ]
+        },
+        {
+          "pos": [
+            -11.0,
+            2.0,
+            -12.0
+          ],
+          "size": [
+            3.0,
+            4.0,
+            3.0
+          ]
+        },
+        {
+          "pos": [
+            11.0,
+            2.0,
+            -12.0
+          ],
+          "size": [
+            3.0,
+            4.0,
+            3.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "platform",
+      "origin": null,
+      "size": [
+        36.0,
+        7.0,
+        34.0
+      ],
+      "stand": [
+        0.0,
+        0.0,
+        12.0
+      ],
+      "yaw_deg": 0.0,
+      "blocks": [
+        {
+          "pos": [
+            0.0,
+            -0.4,
+            -8.0
+          ],
+          "size": [
+            36.0,
+            0.8,
+            6.0
+          ]
+        },
+        {
+          "pos": [
+            -14.0,
+            1.2,
+            2.0
+          ],
+          "size": [
+            2.0,
+            2.4,
+            2.0
+          ]
+        },
+        {
+          "pos": [
+            14.0,
+            1.2,
+            2.0
+          ],
+          "size": [
+            2.0,
+            2.4,
+            2.0
+          ]
+        },
+        {
+          "pos": [
+            0.0,
+            2.5,
+            -14.0
+          ],
+          "size": [
+            1.0,
+            5.0,
+            1.0
+          ]
+        }
+      ]
+    }
+  ],
+  "scaling": {
+    "ref_bpm": 132.0,
+    "radius_exp": 0.0
+  },
+  "patterns": [
+    {
+      "name": "chorus_hook",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 0.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": -30.0,
+            "pitch": 8.0,
+            "dist": 12.0
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 1.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": 30.0,
+            "pitch": 8.0,
+            "dist": 12.0
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": 0.0,
+            "pitch": 16.0,
+            "dist": 13.0
+          },
+          "radius": 0.4,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 4.0,
+            "pitch": 14.0,
+            "dist": 13.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.5,
+          "kind": "flick",
+          "aim": {
+            "yaw": -24.0,
+            "pitch": -2.0,
+            "dist": 11.0
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        }
+      ]
+    },
+    {
+      "name": "chorus_answer",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 0.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": 34.0,
+            "pitch": 18.0,
+            "dist": 14.0
+          },
+          "radius": 0.4,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 1.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": -34.0,
+            "pitch": 18.0,
+            "dist": 14.0
+          },
+          "radius": 0.4,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 1.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": -30.0,
+            "pitch": 16.0,
+            "dist": 14.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": 0.0,
+            "pitch": 4.0,
+            "dist": 12.0
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.0,
+          "kind": "switch",
+          "aim": {
+            "yaw": 22.0,
+            "pitch": 0.0,
+            "dist": 12.0
+          },
+          "radius": 0.45,
+          "lead": 1.5,
+          "hold": 0.0
+        }
+      ]
+    },
+    {
+      "name": "drop_cross",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 0.0,
+          "kind": "track",
+          "aim": {
+            "yaw": -36.0,
+            "pitch": 2.0,
+            "dist": 12.0
+          },
+          "radius": 0.5,
+          "lead": 1.0,
+          "hold": 2.0,
+          "to": {
+            "yaw": 36.0,
+            "pitch": 2.0,
+            "dist": 12.0
+          }
+        },
+        {
+          "beat": 2.5,
+          "kind": "flick",
+          "aim": {
+            "yaw": 20.0,
+            "pitch": -4.0,
+            "dist": 11.0
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": -20.0,
+            "pitch": -4.0,
+            "dist": 11.0
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.5,
+          "kind": "flick",
+          "aim": {
+            "yaw": 0.0,
+            "pitch": 12.0,
+            "dist": 13.0
+          },
+          "radius": 0.42,
+          "lead": 1.0,
+          "hold": 0.0
+        }
+      ]
+    },
+    {
+      "name": "roll_bar",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 2.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": -6.0,
+            "pitch": -2.0,
+            "dist": 12.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 6.0,
+            "pitch": -2.0,
+            "dist": 12.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": -6.0,
+            "pitch": 4.0,
+            "dist": 12.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.25,
+          "kind": "micro",
+          "aim": {
+            "yaw": 0.0,
+            "pitch": 4.0,
+            "dist": 12.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 6.0,
+            "pitch": 4.0,
+            "dist": 12.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.75,
+          "kind": "micro",
+          "aim": {
+            "yaw": 0.0,
+            "pitch": 10.0,
+            "dist": 12.0
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        }
+      ]
+    }
+  ],
+  "audio": "",
+  "stems": [
+    "res://audio/night_market_base.wav",
+    "res://audio/night_market_perc.wav",
+    "res://audio/night_market_keys.wav",
+    "res://audio/night_market_lead.wav"
+  ],
+  "song_offset_s": 0.0,
+  "kit": {},
+  "cues": [
+    {
+      "bar": 33,
+      "kind": "lights",
+      "room": "atrium",
+      "bars": 0,
+      "param": 1
+    },
+    {
+      "bar": 49,
+      "kind": "lights",
+      "room": "atrium",
+      "bars": 0,
+      "param": 0
+    },
+    {
+      "bar": 65,
+      "kind": "train",
+      "room": "platform",
+      "bars": 4,
+      "param": 1
+    },
+    {
+      "bar": 65,
+      "kind": "lights",
+      "room": "platform",
+      "bars": 0,
+      "param": 2
+    },
+    {
+      "bar": 65,
+      "kind": "shake",
+      "room": "",
+      "bars": 0,
+      "param": 1
+    }
+  ]
+}

@@ -408,3 +408,247 @@ pub fn synth_track_sections(bpm: f64, offset_s: f64, seconds: f64, sample_rate: 
     }
     out
 }
+
+
+use crate::chart::{Level, Section};
+
+/// Pattern tiers for automatic charting. A bar's rank among the song's
+/// phrases (quantile of smoothed onset energy) picks the row.
+pub const AUTO_TIERS: &[(f64, &[&str])] = &[
+    (0.00, &["rest", "micro_walk"]),
+    (0.15, &["micro_walk", "micro_zigzag", "flick_lr"]),
+    (0.35, &["flick_lr", "flick_quad", "track_sweep", "track_arc"]),
+    (0.65, &["switch_pair", "flick_quad", "flick_8ths"]),
+    (0.85, &["flick_8ths", "rush_fill", "switch_pair"]),
+];
+
+/// Pick one pattern per bar from the song's energy, in 2-bar phrases, merging
+/// equal neighbours. `energy` is per bar from `bar_energy`; the first two bars
+/// are the lead-in and are skipped; one bar is left at the end.
+pub fn auto_sections(energy: &[f64], bars: usize) -> Vec<Section> {
+    let usable = bars.saturating_sub(3).max(1);
+    let played: Vec<f64> = (0..usable).map(|b| energy.get(b + 2).copied().unwrap_or(0.5)).collect();
+    let n = played.len();
+    let smooth: Vec<f64> = (0..n)
+        .map(|b| {
+            let lo = b.saturating_sub(1);
+            let hi = (b + 3).min(n);
+            played[lo..hi].iter().sum::<f64>() / (hi - lo) as f64
+        })
+        .collect();
+    let phrase: Vec<f64> = (0..n)
+        .map(|b| {
+            let p0 = b - b % 2;
+            let p1 = (p0 + 2).min(n);
+            smooth[p0..p1].iter().sum::<f64>() / (p1 - p0) as f64
+        })
+        .collect();
+    let mut sorted = phrase.clone();
+    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let mut sections: Vec<Section> = Vec::new();
+    for (b, e) in phrase.iter().enumerate() {
+        let rank = sorted.iter().position(|v| v >= e).unwrap_or(0) as f64 / sorted.len().max(1) as f64;
+        let mut row_i = 0;
+        for (i, (lo, _)) in AUTO_TIERS.iter().enumerate() {
+            if rank >= *lo {
+                row_i = i;
+            }
+        }
+        let choices = AUTO_TIERS[row_i].1;
+        let p = choices[(b / 2) % choices.len()];
+        match sections.last_mut() {
+            Some(last) if last.pattern == p => last.repeats += 1,
+            _ => sections.push(Section { pattern: p.to_string(), repeats: 1 }),
+        }
+    }
+    sections
+}
+
+/// A playable level for a song: Range room, energy-mapped sections, the song
+/// as audio with its measured grid.
+pub fn auto_level(name: &str, audio: &str, bpm: f64, offset_s: f64, duration_s: f64, energy: &[f64]) -> Level {
+    let spb = 60.0 / bpm.max(1.0);
+    let bars = (((duration_s - offset_s) / spb) / 4.0).floor().max(0.0) as usize;
+    Level {
+        name: name.to_string(),
+        song: name.to_string(),
+        difficulty: "Auto".into(),
+        charter: "dbmap auto".into(),
+        bpm,
+        lead_in: 8.0,
+        sections: auto_sections(energy, bars),
+        audio: audio.to_string(),
+        song_offset_s: offset_s,
+        ..Level::default()
+    }
+}
+
+/// Decoded audio for playback: interleaved f32 frames, sample rate, channel count.
+pub struct Decoded {
+    pub samples: Vec<f32>,
+    pub sample_rate: u32,
+    pub channels: usize,
+}
+
+impl Decoded {
+    /// Mono mix (the analyser's input).
+    pub fn mono(&self) -> Vec<f32> {
+        let ch = self.channels.max(1);
+        self.samples.chunks(ch).map(|f| f.iter().sum::<f32>() / ch as f32).collect()
+    }
+
+    /// 16-bit little-endian PCM, mono or stereo (more channels fold to stereo),
+    /// ready for an engine WAV stream. Returns (bytes, channels).
+    pub fn pcm16(&self) -> (Vec<u8>, usize) {
+        let ch = self.channels.max(1);
+        let out_ch = ch.min(2);
+        let frames = self.samples.len() / ch;
+        let mut out = Vec::with_capacity(frames * out_ch * 2);
+        let put = |out: &mut Vec<u8>, v: f32| {
+            let s = (v.clamp(-1.0, 1.0) * 32767.0).round() as i16;
+            out.extend_from_slice(&s.to_le_bytes());
+        };
+        for frame in self.samples.chunks(ch) {
+            if out_ch == 1 {
+                put(&mut out, frame[0]);
+            } else {
+                // Left = mean of odd channels, right = mean of even, which maps
+                // L/R, L/R/C, 5.1 and friends to something listenable.
+                let (mut l, mut r, mut nl, mut nr) = (0.0f32, 0.0f32, 0usize, 0usize);
+                for (i, v) in frame.iter().enumerate() {
+                    if i == 2 || i == 3 {
+                        l += v * 0.5;
+                        r += v * 0.5;
+                    } else if i % 2 == 0 {
+                        l += v;
+                        nl += 1;
+                    } else {
+                        r += v;
+                        nr += 1;
+                    }
+                }
+                put(&mut out, l / nl.max(1) as f32);
+                put(&mut out, r / nr.max(1) as f32);
+            }
+        }
+        (out, out_ch)
+    }
+}
+
+/// Decode any supported audio file (wav, flac, ogg/vorbis, mp3, aac/m4a) keeping its channels.
+pub fn decode_audio(path: &str) -> Result<Decoded, String> {
+    use symphonia::core::codecs::audio::AudioDecoderOptions;
+    use symphonia::core::codecs::CodecParameters;
+    use symphonia::core::errors::Error as SymErr;
+    use symphonia::core::formats::probe::Hint;
+    use symphonia::core::formats::{FormatOptions, TrackType};
+    use symphonia::core::io::MediaSourceStream;
+    use symphonia::core::meta::MetadataOptions;
+    let file = std::fs::File::open(path).map_err(|e| format!("{path}: {e}"))?;
+    let mss = MediaSourceStream::new(Box::new(file), Default::default());
+    let mut hint = Hint::new();
+    if let Some(ext) = std::path::Path::new(path).extension().and_then(|e| e.to_str()) {
+        hint.with_extension(ext);
+    }
+    let mut format = symphonia::default::get_probe()
+        .probe(&hint, mss, FormatOptions::default(), MetadataOptions::default())
+        .map_err(|e| format!("{path}: {e}"))?;
+    let track = format.default_track(TrackType::Audio).ok_or_else(|| format!("{path}: no audio track"))?;
+    let track_id = track.id;
+    let params = match &track.codec_params {
+        Some(CodecParameters::Audio(a)) => a.clone(),
+        _ => return Err(format!("{path}: no audio codec parameters")),
+    };
+    let sample_rate = params.sample_rate.ok_or_else(|| format!("{path}: unknown sample rate"))?;
+    let mut decoder = symphonia::default::get_codecs()
+        .make_audio_decoder(&params, &AudioDecoderOptions::default())
+        .map_err(|e| format!("{path}: {e}"))?;
+    let mut samples: Vec<f32> = Vec::new();
+    let mut channels = 0usize;
+    let mut interleaved: Vec<f32> = Vec::new();
+    loop {
+        let packet = match format.next_packet() {
+            Ok(Some(p)) => p,
+            Ok(None) => break,
+            Err(SymErr::IoError(_)) | Err(SymErr::ResetRequired) => break,
+            Err(e) => return Err(format!("{path}: {e}")),
+        };
+        if packet.track_id != track_id {
+            continue;
+        }
+        let decoded = match decoder.decode(&packet) {
+            Ok(d) => d,
+            Err(SymErr::DecodeError(_)) => continue,
+            Err(e) => return Err(format!("{path}: {e}")),
+        };
+        let ch = decoded.spec().channels().count().max(1);
+        if channels == 0 {
+            channels = ch;
+        }
+        interleaved.clear();
+        decoded.copy_to_vec_interleaved::<f32>(&mut interleaved);
+        if ch == channels {
+            samples.extend_from_slice(&interleaved);
+        } else {
+            // A stream that changes channel count mid-way: fold each frame to the first layout.
+            for frame in interleaved.chunks(ch) {
+                for c in 0..channels {
+                    samples.push(frame.get(c).copied().unwrap_or(frame[0]));
+                }
+            }
+        }
+    }
+    if channels == 0 {
+        return Err(format!("{path}: no audio frames"));
+    }
+    Ok(Decoded { samples, sample_rate, channels })
+}
+
+/// Decode any supported audio file to mono f32 (the analyser's input).
+pub fn read_audio_mono(path: &str) -> Result<(Vec<f32>, u32), String> {
+    if path.to_ascii_lowercase().ends_with(".wav") {
+        return read_wav_mono(path);
+    }
+    let d = decode_audio(path)?;
+    Ok((d.mono(), d.sample_rate))
+}
+
+/// A metronome on a grid as mono 16-bit PCM: 1320 Hz on the bar, 880 Hz on
+/// the other beats, 50/40 ms decaying sines, from `offset_s` to `duration_s`.
+pub fn click_grid_pcm16(bpm: f64, offset_s: f64, duration_s: f64, sample_rate: u32) -> Vec<u8> {
+    let sr = sample_rate.max(8000) as f64;
+    let frames = (duration_s.max(0.0) * sr).ceil() as usize;
+    let mut buf = vec![0.0f32; frames];
+    let spb = 60.0 / bpm.max(1.0);
+    let tone = |buf: &mut Vec<f32>, at: f64, freq: f64, secs: f64, gain: f32| {
+        let start = (at * sr).round() as i64;
+        let n = (secs * sr) as i64;
+        for i in 0..n {
+            let f = start + i;
+            if f < 0 || f as usize >= buf.len() {
+                continue;
+            }
+            let env = 1.0 - i as f64 / n as f64;
+            let v = (std::f64::consts::TAU * freq * (i as f64 / sr)).sin() * env * env;
+            buf[f as usize] = (buf[f as usize] + v as f32 * gain).clamp(-1.0, 1.0);
+        }
+    };
+    let mut b = 0usize;
+    loop {
+        let at = offset_s + b as f64 * spb;
+        if at >= duration_s {
+            break;
+        }
+        if b % 4 == 0 {
+            tone(&mut buf, at, 1320.0, 0.055, 0.9);
+        } else {
+            tone(&mut buf, at, 880.0, 0.040, 0.6);
+        }
+        b += 1;
+    }
+    let mut out = Vec::with_capacity(frames * 2);
+    for v in buf {
+        out.extend_from_slice(&((v * 32767.0) as i16).to_le_bytes());
+    }
+    out
+}

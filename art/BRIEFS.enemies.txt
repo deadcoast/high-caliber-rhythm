@@ -1,0 +1,116 @@
+ENEMY BRIEFS, ACT ONE
+---------------------
+
+[1]
+---
+COMMON
+--
+- Style: Cyberpunk Edgerunners (Trigger) line and light over Cyberpunk 2077 materials. Flat two-tone cel, cut at 42% (shader tone_cut 0.42), hard small specular (spec_size 0.08), ink line 2.5 px in #0F0817 (not black), rim in cyan at the top edge. No gradients, no soft shadows, no photoreal.
+- Palette (godot/src/world/palette.gd): ink #0B0714, body #3D3852, steel #38334D, paper #E8E3F0; cores by kind: FLICK magenta #FF2BD6, SWITCH amber #FFA61A, TRACK cyan #00F0FF, MICRO lime #A6FF40, RUSH yellow #F3E600; danger red #FF3B3B; mark/volley yellow #F3E600.
+- Read rule: every enemy reads in 150 ms at 12 m. At 80 deg vertical FOV, 1080p: 13.5 px per degree. Weak point radii at 12 m: 0.45 m = 29 px radius, 0.5 m = 32 px, 0.55 m = 35 px, 0.6 m = 39 px, 0.3 m = 19 px. Bodies at 12 m: 0.9 m = 58 px, 1.7 m = 109 px, 2.2 m = 141 px, 2.4 m = 154 px. Helipad parts sit at 16-18 m: everything two thirds of that.
+- Silhouette rule: the weak point is the brightest, cleanest shape on the enemy, and sits where the chart puts it (the numbers below are the engine's offsets from the core; the core position itself comes from the chart). Nothing on the body may be the same hue as the core.
+- Pop-in: the engine scales the whole enemy 5% -> 100% over 120 ms (cue/pop_ms). Clips start at full size; no scale in the rig.
+- Approach ring: engine-drawn, 3.2x core radius at spawn collapsing to 1.05x at the hit beat over the lead (1 beat = 455 ms at 132, 357 ms at 168; rush plates 0.5 beat). Ring art is a separate brief ([7]); models leave room around the core for it.
+- Telegraph: the core's emission climbs through the last 160 ms of the window (late_ms). Expiry = the enemy fires: a tracer from the core to the player, 90 ms flash, then the enemy shrinks away over 370 ms.
+- Death by hit: 140 ms total. The core blooms to 7x and burns out; the body collapses to nothing. Perfect/Great/Good differ by the bloom's weight, not by a different animation.
+- Import: glTF 2.0 binary (.glb), metres, Y up, -Z is the face (the engine turns the enemy to look at the player). Origin = the core's centre; the body hangs below and around it by the offsets in each brief. Textures: one 2k atlas per enemy, albedo flat fills, emission mask (core and lamps), optional ink mask. One material slot named body, one named core.
+- Collision stays engine-made: the core is a sphere from the chart's radius; the body keeps its greybox box/capsule. A model does not ship colliders.
+- Clips, 30 fps, named exactly: idle (loop, under 2 s), expose (the core opens, 120 ms, played at spawn), fire (the expiry shot, 90 ms hold), die_hit (140 ms), die_expire (370 ms). Striders add run (loop, one stride per beat at 132). Heavies add charge (the last plate's telegraph).
+- Budget: drone 3k tris, gunner 4k, strider 5k, swarm 1k, heavy segment 2.5k, boss hull 12k. Every triangle after that costs the 240 fps budget on the player's side.
+- Hook-up: drop the file at godot/assets/enemies/<enemy>.glb (drone, gunner, strider, swarm, heavy) and the engine shows it in place of the primitive on the next run; the primitive is deleted from enemy.gd only at sign-off. The boss hull: godot/assets/boss/crane.glb.
+- Sign-off per the register: the asset imported, the primitive deleted, a 1080p screenshot from the room's stand point attached to the row in ASSETS.register.md.
+- Concept sheets: three-quarter front, front, side, the core circled, a 1.8 m figure for scale, white ground, no text in the image. Sheets go to art/ref/<enemy>/sheet_NN.png; the chosen one is linked in the enemy's entry below.
+- ref: art/ref/common/
+
+[2]
+---
+DRONE (FLICK)
+--
+- Hit object: circle. Aim scenario: gridshot, spidershot. Damage if unkilled: 10. Core radius 0.45-0.5 m, lead 0.75-1 beat. Kit sound: kick.
+- Behaviour on screen: pops to its anchor, hovers, exposes the core on its beat, leaves. One per beat in flick_lr, two per beat in flick_8ths; up to four live at once.
+- Body: 0.9 x 0.5 x 0.9 m, centred 0.45 m below the core. Quad-rotor security drone, flat and wide: four ducted fans at the corners, a thin chassis, a lens cluster under the nose. The core sits on top, dead centre, as a lens dome with a shutter that opens on expose.
+- Read: the fans are the silhouette (four discs in a square), the dome is the only magenta. From the stand the drone is a flat shape with a bright dome on it; it must not read as a sphere.
+- Motion: idle = hover bob 4 cm and fan spin; expose = shutter irises open 120 ms; fire = the lens cluster flashes and the drone kicks back 10 cm; die_hit = fans shear outward as the dome bursts; die_expire = fans stall, the body drops out of frame.
+- Materials: chassis steel #38334D with paper #E8E3F0 panel decals (a serial, a hazard stripe), fan rims ink line, dome magenta emissive.
+- Prompt stem: "security quad-rotor drone, flat chassis, four ducted fans, glowing magenta lens dome on top, Cyberpunk Edgerunners style, Studio Trigger linework, flat cel shading, bold ink outlines, dark violet and steel, turnaround sheet, three-quarter front side, white background" / negative: "photoreal, realistic render, soft shading, text, watermark, extra fans".
+- ref: art/ref/drone/
+
+[3]
+---
+GUNNER (SWITCH)
+--
+- Hit object: circle pair. Aim scenario: switch (two peek alternately on eighths). Damage: 12. Core radius 0.5 m, lead 1-1.5 beats. Kit sound: snare.
+- Behaviour: two gunners peek from cover on alternating eighths; the chart places them 20-32 deg apart at the same height; the pair fires a volley on the bar if either survives.
+- Body: capsule 0.35 m radius, 1.7 m tall, centred 0.95 m below the core: a standing figure whose core is the visor/upper chest at collarbone height. Corporate security, armoured coat over a hard vest, one rifle held across. The core is the visor band, a single wide amber slit.
+- Read: a tall narrow silhouette next to cover with one amber bar across the top. The rifle breaks the capsule's symmetry on one side; the pair is mirrored (left gunner holds left).
+- Motion: idle = a half-crouch breathing; expose = the head comes up from cover and the visor lights, 120 ms; fire = the rifle muzzle flash and a shoulder kick; die_hit = the visor bursts and the figure drops straight down behind cover; die_expire = the figure ducks back behind cover as it fires.
+- Materials: coat body #3D3852, vest steel, paper piping on the collar and cuffs, visor amber emissive. Ink on the coat's folds.
+- Prompt stem: "corporate security gunner in an armoured long coat, hard vest, rifle held across the chest, a single wide amber visor slit, half-crouched behind cover, Cyberpunk Edgerunners style, Studio Trigger linework, flat cel shading, bold ink outlines, turnaround sheet, white background" / negative: "photoreal, soft shading, face visible, text, watermark".
+- ref: art/ref/gunner/
+
+[4]
+---
+STRIDER (TRACK)
+--
+- Hit object: slider. Aim scenario: strafe-track; the beam is held on the core while it crosses. Damage: 20 (the biggest single hit). Core radius 0.5-0.6 m, lead 1 beat, hold 1.5-4 beats. Kit sound: cymbal.
+- Behaviour: crosses the room on a straight path over its hold (left to right at 12 m in track_sweep, a rising diagonal in track_arc); searchlights on the helipad cross at height. The engine moves it and turns it to face the stand every frame.
+- Body: capsule 0.45 m radius, 2.4 m long, horizontal, centred 0.8 m below the core: a quadruped runner the length of a motorbike. The core rides on the spine above the shoulders as a sensor turret. Legs are the read: four, long, digitigrade, in a run cycle that lands one stride per beat at 132.
+- Read: a low long shape with a cyan turret on its back, moving; it is the only enemy that travels, and the run cycle is what says so at a glance. A trail ribbon behind the turret while the beam is on it (engine VFX, [7]).
+- Motion: run (loop, one stride per beat, the engine does not retime it; author at 132 and the 150 and 168 levels accept the drift); idle (standing, for spawn); expose = the turret unshutters; fire = the turret fires back along the path end; die_hit = the turret bursts and the legs fold mid-stride; die_expire = the runner sprints out.
+- Materials: body #3D3852 with steel leg struts, a paper flank panel with a number, turret cyan emissive.
+- Prompt stem: "four-legged robotic runner the size of a motorbike, long digitigrade legs, sensor turret on its back glowing cyan, mid-stride, Cyberpunk Edgerunners style, Studio Trigger linework, flat cel shading, bold ink outlines, turnaround sheet, white background" / negative: "photoreal, organic, fur, text, watermark".
+- ref: art/ref/strider/
+
+[5]
+---
+SWARM (MICRO)
+--
+- Hit object: small circle chain. Aim scenario: microshot (stepped positions on each beat or half beat). Damage: 4 each. Core radius 0.3 m, lead 0.5-1 beat. Kit sound: hat.
+- Behaviour: many, small, placed in steps of 2-6 deg (micro_walk, micro_zigzag); up to six live in the roll bars before a drop.
+- Body: sphere 0.28 m radius, centred 0.4 m below the core: a palm-sized bot that hangs under its own eye. The core is the eye: a lime lens that is most of what you see.
+- Read: at 12 m the core is 19 px; the bot alone is under the read rule. A lime halo billboard 0.6 m across at 35% behind the eye brings the read to 40 px without changing the hit sphere; the halo is part of the model (a flat quad, emissive, no ink).
+- Motion: idle = a jitter 2 cm on sixteenths (the engine supplies the beat; author a 2 Hz loop); expose = the eye dilates; fire = a pinprick flash; die_hit = the eye pops, the body spins off; die_expire = the bot darts away.
+- Materials: body ink #0B0714 with a steel ring, eye lime emissive, halo lime at 35%.
+- Prompt stem: "palm-sized hovering swarm bot, round dark body hanging under one large lime-green glowing eye, soft glow halo, Cyberpunk Edgerunners style, Studio Trigger linework, flat cel shading, bold ink outlines, turnaround sheet, white background" / negative: "photoreal, insect, legs, text, watermark".
+- ref: art/ref/swarm/
+
+[6]
+---
+HEAVY (RUSH)
+--
+- Hit object: spinner: eight plates in sequence on sixteenths before the charge. Aim scenario: reflex. Damage: 6 per plate. Plate radius 0.55 m, lead 0.5 beat. Kit sound: tom.
+- Engine fact: rush_fill spawns the eight plates as eight enemies on a rising diagonal (yaw -16 to +16, pitch -4 to +6) over two beats, each with its own body. The art is one armour segment that tiles: eight in a line read as one walker's flank crossing the lane. The grouped single-body walker is an engine step on the register's route (TGT-05), not a condition for this asset.
+- Body per segment: box 1.8 x 2.2 x 1.2 m, centred 1.3 m below the plate: a hip-and-leg section of a walker with one armour plate on its shoulder line. The plate is the core: a flat yellow panel that lights when its sixteenth arrives.
+- Read: a wall of dark armour with one lit panel moving along it on sixteenths. The lit panel must be the only yellow; the eight segments must join without a visible seam at 12 m (shared edge profile, no end caps).
+- Motion: idle = a heavy sway; expose = the plate lights (it is already in place); fire = the plate vents and the segment lurches toward the player (charge); die_hit = the plate shears off; die_expire = the plate dims and the segment steps on.
+- Materials: armour #3D3852 with steel joints and paper warning chevrons, plate yellow emissive with an ink border.
+- Prompt stem: "flank of a heavy walker mech, one shoulder armour plate glowing yellow, hip and leg section, repeating armour segment, Cyberpunk Edgerunners style, Studio Trigger linework, flat cel shading, bold ink outlines, side view and three-quarter, white background" / negative: "photoreal, full robot, humanoid, text, watermark".
+- ref: art/ref/heavy/
+
+[7]
+---
+WEAK POINT LANGUAGE (shared)
+--
+- The core is the hit object and the only thing judged. Its colour is the kind's; its shape is a sphere in the engine. Art may dress it (dome, visor, turret, eye, plate) but the dressing stays inside the chart radius so the hit sphere and the picture agree.
+- Approach ring (TGT-06): one flat band mesh and shader for all kinds, tinted by the kind, collapsing onto the core. Hard lock frame in the last 100 ms: the band stops shrinking and snaps to full brightness. HD mod removes it; the core alone must still read.
+- Kill VFX (TGT-07): per verdict weight. Perfect: ring shock plus shatter plus a frame of white; Great: shatter; Good: a puff. All under 120 ms. One prefab, three intensities.
+- Enemy fire (TGT-08): a tracer from the core to the player and a muzzle card on the body; the HUD and post take the damage flash. Red #FF3B3B, 90 ms.
+- Mark (TGT-09): a marked core turns volley yellow with a brand (a ring segment) and a pulse on every bar; the Downbeat kill is every marked core shattering on the same frame.
+- Beam (strider): a trail ribbon from the core while the beam is on it, cyan, fading over 0.3 s.
+- ref: art/ref/weakpoint/
+
+[8]
+---
+THE CRANE (boss, act one)
+--
+- A crane-hung gunship over the helipad, three phases on the song's boss sections: gun pods (switch pairs and drone quads, clear 70%), searchlights (striders crossing at height, swarm bots, clear 70%), the core (heavy plates and the exposed core, clear 80%). The engine: it rises from below the pad on the reveal cue over two bars, sheds two plates per cleared phase, flashes red on a lost phase, collapses on the kill.
+- Hull: 7 x 2.2 x 3.2 m slab with a 3 x 1.6 x 2.2 m cabin on top, arms 5 m to each side ending in lamps, a cable to the ceiling. Origin at the hull centre; godot/assets/boss/crane.glb replaces the slab, cabin and arms; the six plates, the core and the lamps stay engine-driven state carriers until the rig carries them (plates as named nodes plate_0..plate_5, core as core, lamps as lamp_l and lamp_r).
+- Parts: every weak point of every phase is one of the five enemies' cores without its body, tethered to the hull by a line. The art for the parts is the five briefs above; the hull wants sockets where pods, lamps and plates visibly belong.
+- Read: a wide dark shape with a yellow core and two cyan lamps, hanging; the plates are the health bar you can see.
+- Prompt stem: "crane-suspended gunship hovering over a rooftop helipad at night, wide dark hull with a cabin on top, six armour plates along its front edge, a glowing yellow core, two long arms with searchlights, Cyberpunk Edgerunners style, Studio Trigger linework, flat cel shading, bold ink outlines, front and three-quarter views, white background" / negative: "photoreal, helicopter rotors, text, watermark".
+- ref: art/ref/crane/
+
+[9]
+---
+--
+-

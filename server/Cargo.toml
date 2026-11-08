@@ -1,0 +1,24 @@
+[package]
+name = "downbeat-server"
+version = "0.1.0"
+edition = "2021"
+description = "DOWNBEAT online: replay re-scoring, leaderboards, the daily, ghosts"
+
+[[bin]]
+name = "dbserver"
+path = "src/main.rs"
+
+[dependencies]
+downbeat-core = { path = "../core" }
+axum = { version = "0.8", features = ["json", "http1", "tokio"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
+tower = "0.5"
+rusqlite = { version = "0.41", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+sha2 = "0.11"
+hex = "0.4"
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+http-body-util = "0.1"

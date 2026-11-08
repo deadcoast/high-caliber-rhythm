@@ -1,28 +1,17 @@
 //! dbmap: analyse a song (WAV) for tempo and beat-0 offset, then write a
 //! level JSON whose patterns fill the song's bars. One command, whole job.
 //!
-//!   dbmap song.wav                          analyse, print, write levels/<song>.json next to the wav
+//!   dbmap song.wav                          analyse (wav/flac/ogg/mp3/m4a), print, write levels/<song>.json next to it
 //!   dbmap song.wav --set flick --out ../godot/levels --audio res://audio/song.wav
 //!   dbmap --synth 140 0.42 30               analyse a synthetic track (self-test material)
 //!   dbmap song.wav --bpm 128 --offset 0.35  override detection (keep the analysis printout)
 //!   dbmap song.wav --auto                   pick each bar's pattern from the song's own energy
 
-use highcal_core::analysis::{analyze, bar_energy, read_wav_mono, synth_track_sections, Analysis, HOP, ONSET_LAG_SAMPLES};
-use highcal_core::chart::{compile, Level, Scaling, Section};
-use highcal_core::patterns::builtin_lib;
-use highcal_core::rating::rate;
+use downbeat_core::analysis::{analyze, auto_sections, bar_energy, read_audio_mono, synth_track_sections, Analysis, HOP, ONSET_LAG_SAMPLES};
+use downbeat_core::chart::{compile, Level, Section};
+use downbeat_core::patterns::builtin_lib;
+use downbeat_core::rating::rate;
 use std::io::Write;
-
-/// Patterns by intensity for `--auto`. A bar's rank among the song's bars
-/// (quantile of its onset energy) picks the row, so a compressed master and a
-/// dynamic one both spread across the tiers.
-const TIERS: &[(f64, &[&str])] = &[
-    (0.00, &["rest", "micro_walk"]),
-    (0.15, &["micro_walk", "micro_zigzag", "flick_lr"]),
-    (0.35, &["flick_lr", "flick_quad", "track_sweep", "track_arc"]),
-    (0.65, &["switch_pair", "flick_quad", "flick_8ths"]),
-    (0.85, &["flick_8ths", "rush_fill", "switch_pair"]),
-];
 
 const SETS: &[(&str, &[&str])] = &[
     ("warmup", &["flick_lr", "flick_quad", "switch_pair", "micro_walk", "track_sweep", "flick_8ths", "micro_zigzag", "track_arc"]),
@@ -98,7 +87,7 @@ fn main() {
     let t0 = std::time::Instant::now();
     let (samples, sr, source) = match (&wav, synth) {
         (Some(path), _) => {
-            let (s, sr) = read_wav_mono(path).unwrap_or_else(|e| {
+            let (s, sr) = read_audio_mono(path).unwrap_or_else(|e| {
                 eprintln!("{e}");
                 std::process::exit(1)
             });
@@ -179,41 +168,7 @@ fn main() {
     let usable_bars = (bars - 2.0 - 1.0).max(1.0) as usize;
     let mut sections: Vec<Section> = Vec::new();
     if auto {
-        // Quantile rank of each playable bar's energy picks its tier; patterns
-        // rotate every two bars so phrases repeat; equal neighbours merge.
-        let played: Vec<f64> = (0..usable_bars).map(|b| energy.get(b + 2).copied().unwrap_or(0.5)).collect();
-        // Smooth over a 4-bar phrase so one loud fill does not flip a tier,
-        // and decide per 2-bar phrase so both bars share it.
-        let n = played.len();
-        let smooth: Vec<f64> = (0..n)
-            .map(|b| {
-                let lo = b.saturating_sub(1);
-                let hi = (b + 3).min(n);
-                played[lo..hi].iter().sum::<f64>() / (hi - lo) as f64
-            })
-            .collect();
-        let phrase: Vec<f64> = (0..n).map(|b| {
-            let p0 = b - b % 2;
-            let p1 = (p0 + 2).min(n);
-            smooth[p0..p1].iter().sum::<f64>() / (p1 - p0) as f64
-        }).collect();
-        let mut sorted = phrase.clone();
-        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        for (b, e) in phrase.iter().enumerate() {
-            let rank = sorted.iter().position(|v| v >= e).unwrap_or(0) as f64 / sorted.len().max(1) as f64;
-            let mut row_i = 0;
-            for (i, (lo, _)) in TIERS.iter().enumerate() {
-                if rank >= *lo {
-                    row_i = i;
-                }
-            }
-            let choices = TIERS[row_i].1;
-            let p = choices[(b / 2) % choices.len()];
-            match sections.last_mut() {
-                Some(last) if last.pattern == p => last.repeats += 1,
-                _ => sections.push(Section { pattern: p.to_string(), repeats: 1 }),
-            }
-        }
+        sections = auto_sections(&energy, bars.max(0.0) as usize);
     } else {
         let mut k = 0usize;
         let mut filled = 0usize;
@@ -235,13 +190,9 @@ fn main() {
         bpm,
         lead_in,
         sections,
-        scaling: Scaling::default(),
-        patterns: vec![],
         audio: audio.unwrap_or_default(),
-        stems: vec![],
         song_offset_s: offset,
-        drum_stem: -1,
-        kit: Default::default(),
+        ..Level::default()
     };
     let json = level.to_json_pretty();
     if let Ok(chart) = compile(&level, &builtin_lib()) {

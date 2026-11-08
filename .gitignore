@@ -1,3 +1,8 @@
 core/target/
 godot/.godot/
 godot/bin/
+godot/audio/*.wav
+server/target/
+*.db
+*.db-wal
+*.db-shm

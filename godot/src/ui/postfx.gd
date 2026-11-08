@@ -6,6 +6,7 @@ var rect: ColorRect
 var mat: ShaderMaterial
 var _flash := 0.0
 var _grey := 0.0
+var _hurt := 0.0
 
 
 func _ready() -> void:
@@ -23,11 +24,13 @@ func _ready() -> void:
 			_apply_strength(float(value)))
 	DB.target_hit.connect(_on_hit)
 	DB.combo_broken.connect(func() -> void: _grey = 1.0)
+	DB.damaged.connect(func(_a: int, _hp: int, _t: int) -> void: _hurt = 1.0)
+	DB.down.connect(func(_d: int) -> void: _hurt = 1.0)
 
 
 func _apply_strength(v: float) -> void:
 	mat.set_shader_parameter("strength", v)
-	rect.visible = v > 0.0
+	rect.visible = true
 
 
 func _on_hit(_id: int, v: Dictionary) -> void:
@@ -42,6 +45,12 @@ func _process(delta: float) -> void:
 		return
 	_flash = maxf(_flash - delta * 8.0, 0.0)
 	_grey = maxf(_grey - delta * 3.0, 0.0)
+	_hurt = maxf(_hurt - delta * 2.5, 0.0)
 	mat.set_shader_parameter("beat_phase", DB.beat_phase())
 	mat.set_shader_parameter("flash", _flash)
 	mat.set_shader_parameter("grey", _grey)
+	mat.set_shader_parameter("hurt", _hurt)
+	mat.set_shader_parameter("glitch", _hurt)
+	mat.set_shader_parameter("time_s", Time.get_ticks_msec() / 1000.0)
+	mat.set_shader_parameter("aberration", float(Settings.get_value("video", "aberration")))
+	mat.set_shader_parameter("scanlines", float(Settings.get_value("video", "scanlines")))

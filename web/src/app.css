@@ -1,0 +1,58 @@
+/* DOWNBEAT editor. Same palette file as the game (godot/src/world/palette.gd). */
+:root {
+  --ink: #0b0714;
+  --ink-2: #141021;
+  --ink-3: #1f1a30;
+  --line: #2d2645;
+  --paper: #e8e3f0;
+  --dim: #8f88a8;
+  --yellow: #f3e600;
+  --cyan: #00f0ff;
+  --magenta: #ff2bd6;
+  --red: #ff3b3b;
+  --lime: #a6ff40;
+  --amber: #ffa619;
+  --violet: #73338c;
+  font-family: ui-monospace, 'JetBrains Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: var(--paper);
+  background: var(--ink);
+}
+* { box-sizing: border-box; }
+html, body, #app { margin: 0; height: 100%; }
+body { background: var(--ink); }
+button, input, select {
+  font: inherit;
+  color: var(--paper);
+  background: var(--ink-3);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 3px 7px;
+}
+button { cursor: pointer; }
+button:hover { border-color: var(--cyan); }
+button.primary { background: var(--cyan); color: var(--ink); border-color: var(--cyan); font-weight: 700; }
+button.danger:hover { border-color: var(--red); }
+button:disabled { opacity: 0.4; cursor: default; }
+input[type='number'] { width: 5.5em; }
+input[type='text'] { width: 10em; }
+label { color: var(--dim); }
+h2 { font-size: 12px; letter-spacing: 0.12em; color: var(--cyan); margin: 0 0 8px; text-transform: uppercase; }
+h3 { font-size: 12px; letter-spacing: 0.08em; color: var(--dim); margin: 10px 0 4px; text-transform: uppercase; }
+.panel { background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+.stat { color: var(--dim); }
+.stat b { color: var(--paper); font-weight: 600; }
+.kind-flick { color: var(--magenta); }
+.kind-switch { color: var(--amber); }
+.kind-track { color: var(--cyan); }
+.kind-micro { color: var(--lime); }
+.kind-rush { color: var(--yellow); }
+.err { color: var(--red); }
+table { border-collapse: collapse; width: 100%; }
+td, th { padding: 2px 5px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--dim); font-weight: 500; }
+td input[type='number'] { width: 4.6em; padding: 1px 4px; }
+.sel { outline: 1px solid var(--yellow); }
+canvas { display: block; }

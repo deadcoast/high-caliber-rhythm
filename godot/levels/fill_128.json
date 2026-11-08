@@ -44,6 +44,8 @@
       "repeats": 1
     }
   ],
+  "segments": [],
+  "rooms": [],
   "scaling": {
     "ref_bpm": 128.0,
     "radius_exp": 0.0
@@ -52,6 +54,5 @@
   "audio": "",
   "stems": [],
   "song_offset_s": 0.0,
-  "drum_stem": -1,
   "kit": {}
 }

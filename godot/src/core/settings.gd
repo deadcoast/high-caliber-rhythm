@@ -11,8 +11,10 @@ var _cfg := ConfigFile.new()
 
 const DEFAULTS := {
 	"input": {"cm_per_360": 34.0, "dpi": 800.0, "offset_ms": 0.0},
-	"video": {"fov": 80.0, "postfx": 0.6, "max_fps": 0},
+	"video": {"fov": 80.0, "postfx": 0.6, "max_fps": 0, "aberration": 0.5, "scanlines": 0.25},
 	"audio": {"master_db": 0.0},
+	"cue": {"ring_start": 3.2, "pop_ms": 120.0, "telegraph": 1.0},
+	"online": {"url": "", "name": "player", "player_id": "", "token": ""},
 }
 
 
@@ -34,6 +36,10 @@ func get_value(section: String, key: String) -> Variant:
 
 func set_value(section: String, key: String, value: Variant) -> void:
 	_cfg.set_value(section, key, value)
+	if section == "video" and key == "max_fps":
+		Engine.max_fps = int(value)
+	elif section == "audio" and key == "master_db":
+		AudioServer.set_bus_volume_db(0, float(value))
 	changed.emit(section, key, value)
 	save()
 

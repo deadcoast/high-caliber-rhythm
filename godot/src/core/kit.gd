@@ -6,7 +6,7 @@ extends RefCounted
 ## can supply its own samples through `kit` in its JSON.
 
 const SAMPLE_RATE := 44100
-const KINDS := ["FLICK", "SWITCH", "MICRO", "TRACK", "RUSH", "DEAD"]
+const KINDS := ["FLICK", "SWITCH", "MICRO", "TRACK", "RUSH", "DEAD", "STEP", "DASH", "VOLLEY"]
 
 
 ## Build the full kit. Keys are kind labels; values AudioStreamWAV.
@@ -19,6 +19,9 @@ static func build() -> Dictionary:
 		"TRACK": k._wav(k._cymbal()),
 		"RUSH": k._wav(k._tom()),
 		"DEAD": k._wav(k._dead()),
+		"STEP": k._wav(k._step()),
+		"DASH": k._wav(k._dash()),
+		"VOLLEY": k._wav(k._volley()),
 	}
 
 
@@ -121,6 +124,49 @@ func _dead() -> PackedFloat32Array:
 	for i in n:
 		var t := float(i) / SAMPLE_RATE
 		out[i] = (sin(TAU * 70.0 * t) * 0.4 + rng.randf_range(-1.0, 1.0) * 0.12) * exp(-t * 60.0)
+	return out
+
+
+func _step() -> PackedFloat32Array:
+	# Boot on concrete: short filtered noise with a low thump.
+	var n := int(0.05 * SAMPLE_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 23
+	for i in n:
+		var t := float(i) / SAMPLE_RATE
+		out[i] = (rng.randf_range(-1.0, 1.0) * 0.25 + sin(TAU * 90.0 * t) * 0.3) * exp(-t * 70.0)
+	return out
+
+
+func _dash() -> PackedFloat32Array:
+	# Rising whoosh over 180 ms.
+	var n := int(0.18 * SAMPLE_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 29
+	var prev := 0.0
+	for i in n:
+		var t := float(i) / SAMPLE_RATE
+		var white := rng.randf_range(-1.0, 1.0)
+		var lp := prev + (white - prev) * clampf(0.05 + t * 2.0, 0.0, 1.0)
+		prev = lp
+		var env := sin(PI * t / 0.18)
+		out[i] = lp * env * 0.6
+	return out
+
+
+func _volley() -> PackedFloat32Array:
+	# The Downbeat: a detuned stab with a long tail.
+	var n := int(0.6 * SAMPLE_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in n:
+		var t := float(i) / SAMPLE_RATE
+		var env := exp(-t * 5.0)
+		out[i] = (sin(TAU * 220.0 * t) + sin(TAU * 223.0 * t) * 0.8 + sin(TAU * 440.0 * t) * 0.4 + sin(TAU * 55.0 * t) * 0.9) * 0.3 * env
 	return out
 
 

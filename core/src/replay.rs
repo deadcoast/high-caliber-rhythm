@@ -23,6 +23,22 @@ pub enum Input {
     Shot { at: f64, raw_time: f64, target: i64, offset_m: f32 },
     /// A tracking sample.
     Track { at: f64, target: u32, on: bool },
+    /// The model reached `at` and restarted a section there. Replay seeks to
+    /// the same moment so the same down happens before later inputs apply.
+    Advance { at: f64 },
+    /// A weak point marked for the Downbeat volley.
+    Mark { at: f64, target: u32 },
+    /// The volley released at a raw stream time.
+    Release { at: f64, raw_time: f64 },
+}
+
+impl Input {
+    /// The chart time the model had reached when the input was applied.
+    pub fn at(&self) -> f64 {
+        match *self {
+            Input::Shot { at, .. } | Input::Track { at, .. } | Input::Advance { at } | Input::Mark { at, .. } | Input::Release { at, .. } => at,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -31,9 +47,15 @@ pub struct Replay {
     pub clock: ClockConfig,
     pub windows: Windows,
     pub scoring: Scoring,
+    #[serde(default)]
+    pub mods: crate::mods::Mods,
     /// `Chart::fingerprint` of the chart the run was judged against.
     pub chart_fingerprint: u64,
     pub inputs: Vec<Input>,
+    /// Chart time the live model had reached when the replay was taken. Replay
+    /// stops there, so a run abandoned mid-level re-scores as it stood.
+    #[serde(default)]
+    pub end_chart_time: f64,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -68,7 +90,7 @@ impl Replay {
     /// Replay to a report. Refuses if the level no longer compiles to the
     /// chart the run was judged against.
     pub fn play(&self) -> Result<Report, ReplayError> {
-        let mut game = Game::from_level(&self.level, self.clock, self.windows, self.scoring).map_err(ReplayError::Compile)?;
+        let mut game = Game::from_level_with_mods(&self.level, self.mods, self.clock, self.windows, self.scoring).map_err(ReplayError::Compile)?;
         let current = game.chart().fingerprint();
         if current != self.chart_fingerprint {
             return Err(ReplayError::ChartMismatch { recorded: self.chart_fingerprint, current });
@@ -85,9 +107,18 @@ impl Replay {
                     game.seek_chart_time(at);
                     game.track_sample(target, on);
                 }
+                Input::Advance { at } => game.seek_chart_time(at),
+                Input::Mark { at, target } => {
+                    game.seek_chart_time(at);
+                    game.mark(target);
+                }
+                Input::Release { at, raw_time } => {
+                    game.seek_chart_time(at);
+                    game.release(raw_time);
+                }
             }
         }
-        game.seek_chart_time(game.chart().total_time + 1.0);
+        game.seek_chart_time(self.end_chart_time);
         Ok(game.report())
     }
 }

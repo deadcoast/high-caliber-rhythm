@@ -1,18 +1,26 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=16 format=3]
 
-[ext_resource type="Script" path="res://src/arena/arena.gd" id="1_arena"]
+[ext_resource type="Script" path="res://src/world/level.gd" id="1_level"]
 [ext_resource type="Script" path="res://src/player/player.gd" id="2_player"]
-[ext_resource type="Script" path="res://src/arena/spawner.gd" id="3_spawner"]
+[ext_resource type="Script" path="res://src/world/spawner.gd" id="3_spawner"]
 [ext_resource type="Script" path="res://src/ui/hud.gd" id="4_hud"]
 [ext_resource type="Script" path="res://src/core/main.gd" id="5_main"]
 [ext_resource type="Script" path="res://src/ui/postfx.gd" id="6_postfx"]
 [ext_resource type="Script" path="res://src/player/weapon.gd" id="7_weapon"]
+[ext_resource type="Script" path="res://src/ui/range_menu.gd" id="8_range"]
+[ext_resource type="Script" path="res://src/ui/results_screen.gd" id="9_results"]
+[ext_resource type="Script" path="res://src/core/replay_player.gd" id="10_replay"]
+[ext_resource type="Script" path="res://src/ui/any_song.gd" id="11_anysong"]
+[ext_resource type="Script" path="res://src/ui/song_confirm.gd" id="12_confirm"]
+[ext_resource type="Script" path="res://src/ui/menu.gd" id="13_menu"]
+[ext_resource type="Script" path="res://src/world/boss.gd" id="14_boss"]
+[ext_resource type="Script" path="res://src/world/ghost.gd" id="15_ghost"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("5_main")
 
-[node name="Arena" type="Node3D" parent="."]
-script = ExtResource("1_arena")
+[node name="Level" type="Node3D" parent="."]
+script = ExtResource("1_level")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
@@ -27,6 +35,12 @@ current = true
 [node name="Weapon" type="Node3D" parent="Player/Head/Camera"]
 script = ExtResource("7_weapon")
 
+[node name="Boss" type="Node3D" parent="."]
+script = ExtResource("14_boss")
+
+[node name="Ghost" type="Node" parent="."]
+script = ExtResource("15_ghost")
+
 [node name="Spawner" type="Node3D" parent="."]
 script = ExtResource("3_spawner")
 
@@ -35,3 +49,25 @@ script = ExtResource("6_postfx")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_hud")
+
+[node name="RangeMenu" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("8_range")
+
+[node name="Results" type="CanvasLayer" parent="."]
+script = ExtResource("9_results")
+
+[node name="ReplayPlayer" type="Node" parent="."]
+script = ExtResource("10_replay")
+
+[node name="AnySong" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("11_anysong")
+
+[node name="SongConfirm" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("12_confirm")
+
+[node name="Menu" type="CanvasLayer" parent="."]
+process_mode = 3
+script = ExtResource("13_menu")

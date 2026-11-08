@@ -7,10 +7,12 @@
 //!   dbsim --bot perfect        the clock and judge with zero human error
 //!   dbsim --jitter 35 --bias 20 --seed 3
 //!   dbsim --level-json 128 > ../godot/levels/warmup_128.json
+//!   dbsim --level ../godot/levels/night_market_132.json   play a level file
 
-use highcal_core::patterns::{fill_level, warmup_level};
-use highcal_core::score::Report;
-use highcal_core::sim::{run_level, Bot, SimConfig, SimResult};
+use downbeat_core::chart::Level;
+use downbeat_core::patterns::{fill_level, street_hard_level, street_level, warmup_level};
+use downbeat_core::score::Report;
+use downbeat_core::sim::{run_level, Bot, SimConfig, SimResult};
 use std::io::Write;
 
 struct Args {
@@ -19,6 +21,9 @@ struct Args {
     seed: u64,
     no_audio: bool,
     fill: bool,
+    street: bool,
+    hard: bool,
+    level: Option<Level>,
 }
 
 fn parse() -> Args {
@@ -27,6 +32,9 @@ fn parse() -> Args {
     let mut seed = 7u64;
     let mut no_audio = false;
     let mut fill = false;
+    let mut street = false;
+    let mut hard = false;
+    let mut level: Option<Level> = None;
     let argv: Vec<String> = std::env::args().skip(1).collect();
     let mut i = 0;
     let take = |i: &mut usize| -> String {
@@ -56,15 +64,38 @@ fn parse() -> Args {
             "--seed" => seed = take(&mut i).parse().expect("seed"),
             "--no-audio" => no_audio = true,
             "--fill" => fill = true,
+            "--street" => street = true,
+            "--hard" => hard = true,
+            "--level" => {
+                let path = take(&mut i);
+                let text = std::fs::read_to_string(&path).unwrap_or_else(|e| {
+                    eprintln!("{path}: {e}");
+                    std::process::exit(2)
+                });
+                let l = Level::from_json(&text).unwrap_or_else(|e| {
+                    eprintln!("{path}: {e}");
+                    std::process::exit(2)
+                });
+                bpms = vec![l.bpm];
+                level = Some(l);
+            }
             "--level-json" => {
                 // Print the warmup level as JSON (levels/*.json authoring reference) and exit.
                 let bpm: f64 = take(&mut i).parse().expect("bpm number");
-                let level = if argv.iter().any(|a| a == "--fill") { fill_level(bpm) } else { warmup_level(bpm) };
+                let level = if argv.iter().any(|a| a == "--hard") {
+                    street_hard_level(bpm)
+                } else if argv.iter().any(|a| a == "--street") {
+                    street_level(bpm)
+                } else if argv.iter().any(|a| a == "--fill") {
+                    fill_level(bpm)
+                } else {
+                    warmup_level(bpm)
+                };
                 println!("{}", level.to_json_pretty());
                 std::process::exit(0)
             }
             "-h" | "--help" => {
-                println!("dbsim [--bpm N | --sweep] [--fill] [--bot perfect|human] [--jitter MS] [--bias MS] [--hit P] [--seed N] [--no-audio] [--level-json BPM [--fill]]");
+                println!("dbsim [--bpm N | --sweep] [--fill | --street | --hard | --level FILE] [--bot perfect|human] [--jitter MS] [--bias MS] [--hit P] [--seed N] [--no-audio] [--level-json BPM [--fill]]");
                 std::process::exit(0)
             }
             other => {
@@ -74,7 +105,7 @@ fn parse() -> Args {
         }
         i += 1;
     }
-    Args { bpms, bot, seed, no_audio, fill }
+    Args { bpms, bot, seed, no_audio, fill, street, hard, level }
 }
 
 fn bar(frac: f64, width: usize) -> String {
@@ -92,7 +123,8 @@ fn print_run(bpm: f64, r: &SimResult) {
     let row = |s: String| println!("| {:<W$} |", s);
     let rep: &Report = &r.report;
     println!("+{rule}+");
-    row(format!("highcal  {} @ {bpm:.0} BPM     grade {}     score {}", r.name, rep.grade.label(), rep.score));
+    row(format!("DOWNBEAT  {} @ {bpm:.0} BPM   {}   grade {}   score {}", r.name, rep.mods, rep.grade.label(), rep.score));
+    row(format!("          {:.0} pp   {:.2} stars{}", rep.pp, rep.stars, if rep.pfc { "   PFC" } else if rep.fc { "   FC" } else { "" }));
     println!("+{rule}+");
     let judged = (rep.hits + rep.expired).max(1) as f64;
     let rows = [
@@ -110,7 +142,10 @@ fn print_run(bpm: f64, r: &SimResult) {
     row(String::new());
     row(format!("aim      hits {}/{} shots   acc {}   precision {}   whiffs {}", rep.hits, rep.shots, pct(rep.aim_accuracy), pct(rep.precision), rep.whiffs));
     row(format!("timing   on-beat {}   quality {}   offset {:+.1} ms   sd {:.1} ms", pct(rep.beat_accuracy), pct(rep.timing_quality), rep.timing_mean_ms, rep.timing_std_ms));
-    row(format!("track    on-target {}   combo max {}", pct(rep.track_ratio), rep.max_combo));
+    row(format!("track    on-target {}   combo max {}   damage {}   downs {}   hp {}", pct(rep.track_ratio), rep.max_combo, rep.damage_taken, rep.downs, rep.hp));
+    if rep.phases_cleared + rep.phase_fails > 0 {
+        row(format!("boss     phases cleared {}   phases lost {}", rep.phases_cleared, rep.phase_fails));
+    }
     row(String::new());
     row(format!("{:<10} {:>5} {:>5} {:>8} {:>8} {:>10} {:>8}", "KIND", "tgts", "hits", "on-beat", "expired", "precision", "track"));
     for (k, s) in &rep.by_kind {
@@ -120,7 +155,7 @@ fn print_run(bpm: f64, r: &SimResult) {
     }
     row(String::new());
     row(format!("clock    {} frames   {} ticks   {} beats   {} bars   {} spawns", r.frames, r.ticks, r.beats, r.bars, r.spawns));
-    row(format!("audio    drift rms {:.2} ms   max {:.2} ms   snaps {}   simulated {:.1} s", r.rms_drift_ms, r.max_abs_drift_ms, r.snaps, r.sim_time_s));
+    row(format!("audio    drift rms {:.2} ms   max {:.2} ms   snaps {}   restarts {}   simulated {:.1} s", r.rms_drift_ms, r.max_abs_drift_ms, r.snaps, r.restarts, r.sim_time_s));
     println!("+{rule}+");
 }
 
@@ -137,7 +172,17 @@ fn main() {
         print!("running {bpm:.0} BPM ... ");
         std::io::stdout().flush().ok();
         let t0 = std::time::Instant::now();
-        let level = if args.fill { fill_level(bpm) } else { warmup_level(bpm) };
+        let level = match &args.level {
+            Some(l) => {
+                let mut l = l.clone();
+                l.bpm = bpm;
+                l
+            }
+            None if args.hard => street_hard_level(bpm),
+            None if args.street => street_level(bpm),
+            None if args.fill => fill_level(bpm),
+            None => warmup_level(bpm),
+        };
         let r = run_level(&level, args.bot, cfg);
         println!("{:.0} ms", t0.elapsed().as_secs_f64() * 1000.0);
         results.push((bpm, r));

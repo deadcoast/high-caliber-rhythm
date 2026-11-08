@@ -17,6 +17,9 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 Settings="*res://src/core/settings.gd"
 DB="*res://src/core/db.gd"
 Scores="*res://src/core/scores.gd"
+Stats="*res://src/core/stats.gd"
+Campaign="*res://src/core/campaign.gd"
+Online="*res://src/core/online.gd"
 
 [display]
 

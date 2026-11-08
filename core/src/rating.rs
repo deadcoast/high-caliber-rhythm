@@ -98,3 +98,45 @@ pub fn rate(chart: &Chart) -> Rating {
 /// `raw` of the builtin warmup at 128 BPM; fixes the 3.0-star anchor. The
 /// `rating_anchor` test holds it to the current pattern library.
 pub const WARMUP_128_RAW: f64 = 20.222;
+
+
+/// Range rank from the mean composite of recent runs in a BPM band.
+pub fn rank(mean_composite: f64) -> &'static str {
+    match mean_composite {
+        c if c >= 0.95 => "DIAMOND",
+        c if c >= 0.88 => "PLATINUM",
+        c if c >= 0.78 => "GOLD",
+        c if c >= 0.65 => "SILVER",
+        c if c >= 0.50 => "BRONZE",
+        _ => "IRON",
+    }
+}
+
+/// BPM band label for ranks: 20-BPM bands, e.g. "120-139".
+pub fn bpm_band(bpm: f64) -> String {
+    let lo = ((bpm / 20.0).floor() * 20.0) as i64;
+    format!("{}-{}", lo, lo + 19)
+}
+
+
+/// Performance of one play. Difficulty enters squared (a 4-star chart is worth
+/// well over twice a 2-star one), accuracy cubed (the last few percent are
+/// where the skill is), full combo keeps 40% of the value on the table, and
+/// the mod multiplier scales it. Mine; tune against the first leaderboards.
+pub fn performance(stars: f64, composite: f64, combo_ratio: f64, mod_multiplier: f64) -> f64 {
+    if stars <= 0.0 {
+        return 0.0;
+    }
+    let base = stars.powf(2.0) * 50.0;
+    let acc = composite.clamp(0.0, 1.0).powf(3.0);
+    let combo = 0.6 + 0.4 * combo_ratio.clamp(0.0, 1.0);
+    base * acc * combo * mod_multiplier
+}
+
+/// Profile rating from a player's best performance per chart, osu-weighted:
+/// sorted descending, the i-th play counts 0.95^i.
+pub fn profile_rating(best_pp_per_chart: &[f64]) -> f64 {
+    let mut v: Vec<f64> = best_pp_per_chart.iter().copied().filter(|p| p.is_finite() && *p > 0.0).collect();
+    v.sort_by(|a, b| b.partial_cmp(a).unwrap());
+    v.iter().enumerate().map(|(i, p)| p * 0.95f64.powi(i as i32)).sum()
+}

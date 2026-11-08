@@ -127,6 +127,14 @@ impl Conductor {
         }
     }
 
+    /// Jump to a song time in either direction without emitting events
+    /// (section restart). Tick bookkeeping is re-anchored so no crossing is
+    /// double-emitted or skipped.
+    pub fn seek(&mut self, song_time: f64) {
+        self.song_time = song_time;
+        self.last_tick = self.tick_index_at(song_time);
+    }
+
     pub fn is_running(&self) -> bool {
         self.running
     }

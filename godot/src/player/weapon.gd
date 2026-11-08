@@ -23,7 +23,7 @@ func _ready() -> void:
 	bm.size = Vector3(0.08, 0.12, 0.42)
 	_mesh.mesh = bm
 	_mesh.position = Vector3(0, 0, -0.1)
-	_mat = Cel.material(Color(0.20, 0.19, 0.26), 0.0, Color(1.0, 0.18, 0.70))
+	_mat = Cel.material(Color(0.20, 0.19, 0.26), 0.0, Palette.MAGENTA)
 	_mesh.material_override = _mat
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_mesh)

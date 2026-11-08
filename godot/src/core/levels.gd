@@ -1,31 +1,34 @@
 class_name Levels
 extends RefCounted
-## Level index: every res://levels/*.json with its rating, for level select
-## and the `--list-levels` printout.
+## Level index: every shipped level (res://levels/*.json) and every Any Song
+## level (user://songs/*.json) with its rating under a mod set and its best,
+## for level select and the `--list-levels` printout.
 
 const DIR := "res://levels"
+const SONG_DIR := "user://songs"
 
 
-static func index() -> Array[Dictionary]:
+static func index(mods: String = "NM") -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if DB.game == null:
 		return out
-	var dir := DirAccess.open(DIR)
-	if dir == null:
-		return out
-	var names := dir.get_files()
-	names.sort()
-	for f in names:
-		if not f.ends_with(".json"):
+	for d in [DIR, SONG_DIR]:
+		var dir := DirAccess.open(d)
+		if dir == null:
 			continue
-		var path := "%s/%s" % [DIR, f]
-		var info: Dictionary = DB.game.rate_level_json(FileAccess.get_file_as_string(path))
-		if info.is_empty():
-			continue
-		info["path"] = path
-		var b := Scores.best(str(info.name), str(info.fingerprint))
-		info["best"] = b
-		out.append(info)
+		var names := dir.get_files()
+		names.sort()
+		for f in names:
+			if not f.ends_with(".json"):
+				continue
+			var path := "%s/%s" % [d, f]
+			var info: Dictionary = DB.game.rate_level_json_mods(FileAccess.get_file_as_string(path), mods)
+			if info.is_empty():
+				continue
+			info["path"] = path
+			info["source"] = "song" if d == SONG_DIR else "level"
+			info["best"] = Scores.best(str(info.name), str(info.fingerprint), mods)
+			out.append(info)
 	return out
 
 

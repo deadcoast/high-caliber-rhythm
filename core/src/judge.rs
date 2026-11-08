@@ -113,10 +113,29 @@ pub enum Verdict {
     /// Shot hit no live target. `grid_delta_ms` is the distance to the nearest
     /// beat so the HUD can still show the player where the pulse was.
     Whiff { grid_delta_ms: f64 },
-    /// Target left its window unshot.
+    /// Enemy left its window alive: it fires at the player as it goes.
     Expired { target: u32, kind: Kind },
+    /// The shot from an expired enemy landed. `hp` is what is left.
+    Damage { target: u32, kind: Kind, amount: u32, hp: u32 },
+    /// HP reached zero. Followed by `Restart` unless `no_fail`.
+    Down { target: u32, downs: u32 },
+    /// Downbeat volley released on the bar: every marked weak point dies with
+    /// this timing. `kills` lists them in chart order.
+    Volley { timing: Timing, delta_ms: f64, kills: Vec<u32> },
+    /// Volley released off the bar (or with nothing marked): marks lost,
+    /// charge lost, combo breaks.
+    VolleyMiss { delta_ms: f64, marked: u32 },
+    /// The run rewound to `chart_time`, one bar before the first enemy of
+    /// `segment`. The engine seeks the song, clears live enemies and resets
+    /// the HUD; the model has already reset the segment's targets.
+    Restart { segment: u32, chart_time: f64 },
     /// Tracking target finished: `on` of `total` tick samples were on target.
     TrackDone { target: u32, on: u32, total: u32 },
+    /// A boss phase closed: `kills` of `total` weak points died. `cleared`
+    /// means kills reached the phase's clear ratio; otherwise the boss lands
+    /// its attack (the session answers with `Down`). `last` and `cleared`
+    /// together are the boss kill.
+    PhaseEnd { segment: u32, phase: u32, kills: u32, total: u32, cleared: bool, last: bool },
     /// Shot touched a target that is not judgeable (already consumed, tracking).
     Ignored { target: u32, reason: String },
 }
@@ -136,6 +155,10 @@ pub struct Judge {
     state: Vec<State>,
     track_on: Vec<u32>,
     track_total: Vec<u32>,
+    /// Done by a hit (any timing) or a held track, as opposed to expired.
+    killed: Vec<bool>,
+    /// Boss phases already closed (index into chart.phases).
+    phase_closed: Vec<bool>,
     next_spawn: usize,
     /// Lowest index that may still be Live or Tracking; everything below is Done.
     low_water: usize,
@@ -145,12 +168,15 @@ pub struct Judge {
 impl Judge {
     pub fn new(chart: Chart, windows: Windows) -> Self {
         let n = chart.targets.len();
+        let phases = chart.phases.len();
         Self {
             chart,
             windows,
             state: vec![State::Pending; n],
             track_on: vec![0; n],
             track_total: vec![0; n],
+            killed: vec![false; n],
+            phase_closed: vec![false; phases],
             next_spawn: 0,
             low_water: 0,
             now: f64::NEG_INFINITY,
@@ -195,6 +221,11 @@ impl Judge {
 
     /// Advance chart time. Emits spawns, expiries and finished tracks.
     /// Time never moves backwards: an earlier value is ignored.
+    /// The chart time the judge has been advanced to.
+    pub fn now(&self) -> f64 {
+        self.now
+    }
+
     pub fn advance(&mut self, chart_time: f64, out: &mut Vec<Verdict>) {
         if chart_time < self.now {
             return;
@@ -223,6 +254,7 @@ impl Judge {
                 }
                 (State::Tracking, Kind::Track) if chart_time > t.end_time => {
                     self.state[i] = State::Done;
+                    self.killed[i] = self.track_total[i] > 0 && self.track_on[i] * 2 >= self.track_total[i];
                     out.push(Verdict::TrackDone {
                         target: i as u32,
                         on: self.track_on[i],
@@ -239,6 +271,42 @@ impl Judge {
         while self.low_water < self.state.len() && self.state[self.low_water] == State::Done {
             self.low_water += 1;
         }
+        // Boss phases close once their last window has been decided.
+        for k in 0..self.chart.phases.len() {
+            if self.phase_closed[k] {
+                continue;
+            }
+            let p = &self.chart.phases[k];
+            if chart_time <= p.end_time + late {
+                continue;
+            }
+            self.phase_closed[k] = true;
+            let (kills, total) = self.phase_kills(k);
+            let cleared = total == 0 || kills as f64 >= (p.clear * total as f64 - 1e-9).ceil();
+            out.push(Verdict::PhaseEnd { segment: p.segment, phase: p.phase, kills, total, cleared, last: p.last });
+        }
+    }
+
+    /// Kills so far in boss phase `k` (index into the chart's phases) and its target count.
+    pub fn phase_kills(&self, k: usize) -> (u32, u32) {
+        let seg = self.chart.phases[k].segment;
+        let mut kills = 0;
+        let mut total = 0;
+        for (i, t) in self.chart.targets.iter().enumerate() {
+            if t.segment == seg {
+                total += 1;
+                if self.killed[i] {
+                    kills += 1;
+                }
+            }
+        }
+        (kills, total)
+    }
+
+    /// Boss standing: (phase index into chart.phases that is current or next,
+    /// kills, total) across every phase of the boss containing `k`.
+    pub fn is_phase_closed(&self, k: usize) -> bool {
+        self.phase_closed.get(k).copied().unwrap_or(false)
     }
 
     /// Judge a click.
@@ -257,6 +325,7 @@ impl Judge {
                 let timing = self.windows.judge(delta_ms);
                 let precision = (1.0 - hit.offset_m / t.radius.max(1e-4)).clamp(0.0, 1.0);
                 self.state[i] = State::Done;
+                self.killed[i] = true;
                 Verdict::Hit { target: hit.target, kind: t.kind, timing, delta_ms, precision, hit_beat: t.hit_beat }
             }
             State::Live | State::Tracking => {
@@ -265,6 +334,78 @@ impl Judge {
             State::Pending => Verdict::Ignored { target: hit.target, reason: "not spawned".into() },
             State::Done => Verdict::Ignored { target: hit.target, reason: "already consumed".into() },
         }
+    }
+
+    /// Put every target of `segment` back to Pending and rewind the judge to
+    /// `chart_time` (which must precede their spawns). Spawns will be emitted
+    /// again as time reaches them.
+    pub fn reset_segment(&mut self, segment: u32, chart_time: f64) {
+        for (i, t) in self.chart.targets.iter().enumerate() {
+            if t.segment == segment {
+                self.state[i] = State::Pending;
+                self.track_on[i] = 0;
+                self.track_total[i] = 0;
+                self.killed[i] = false;
+            }
+        }
+        for (k, p) in self.chart.phases.iter().enumerate() {
+            if p.segment == segment {
+                self.phase_closed[k] = false;
+            }
+        }
+        self.now = chart_time;
+        self.next_spawn = self
+            .chart
+            .spawn_order
+            .iter()
+            .position(|&idx| self.state[idx] == State::Pending)
+            .unwrap_or(self.chart.spawn_order.len());
+        self.low_water = self.state.iter().position(|s| *s != State::Done).unwrap_or(self.state.len());
+    }
+
+    /// Chart time of the first spawn in `segment`, if it has targets.
+    pub fn segment_first_spawn(&self, segment: u32) -> Option<f64> {
+        self.chart
+            .targets
+            .iter()
+            .filter(|t| t.segment == segment)
+            .map(|t| t.spawn_time)
+            .fold(None, |acc, t| Some(acc.map_or(t, |a: f64| a.min(t))))
+    }
+
+    /// Signed ms from the nearest bar line (downbeat), 4 beats to the bar.
+    pub fn ms_from_nearest_bar(&self, chart_time: f64) -> f64 {
+        let bar = self.sec_per_beat() * 4.0;
+        let b = chart_time / bar;
+        (b - b.round()) * bar * 1000.0
+    }
+
+    /// Downbeat volley. Judged against the nearest bar line; on-beat kills every
+    /// marked target that is still live (as Hits with the release timing,
+    /// precision 1.0), off-beat kills nothing.
+    pub fn fire_volley(&mut self, chart_time: f64, marked: &[u32], out: &mut Vec<Verdict>) -> Verdict {
+        let delta_ms = self.ms_from_nearest_bar(chart_time);
+        let timing = self.windows.judge(delta_ms);
+        let live: Vec<u32> = marked.iter().copied().filter(|&id| self.is_live(id) && self.chart.targets[id as usize].kind != Kind::Track).collect();
+        if !timing.is_on_beat() || live.is_empty() {
+            return Verdict::VolleyMiss { delta_ms, marked: marked.len() as u32 };
+        }
+        let mut kills = live.clone();
+        kills.sort_unstable();
+        for &id in &kills {
+            let t = &self.chart.targets[id as usize];
+            self.state[id as usize] = State::Done;
+            self.killed[id as usize] = true;
+            out.push(Verdict::Hit {
+                target: id,
+                kind: t.kind,
+                timing,
+                delta_ms,
+                precision: 1.0,
+                hit_beat: t.hit_beat,
+            });
+        }
+        Verdict::Volley { timing, delta_ms, kills }
     }
 
     /// One tracking sample. Call once per clock tick for every live Track

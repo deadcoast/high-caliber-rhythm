@@ -1,0 +1,777 @@
+{
+  "name": "skyline_168",
+  "song": "Skyline",
+  "artist": "DOWNBEAT (placeholder track)",
+  "difficulty": "Normal",
+  "charter": "hand chart, editor format",
+  "bpm": 168.0,
+  "lead_in": 8.0,
+  "sections": [],
+  "segments": [
+    {
+      "type": "traversal",
+      "bars": 6.0
+    },
+    {
+      "type": "encounter",
+      "room": "rooftop",
+      "sections": [
+        {
+          "pattern": "micro_walk",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_lr",
+          "repeats": 2
+        },
+        {
+          "pattern": "micro_zigzag",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_lr",
+          "repeats": 1
+        },
+        {
+          "pattern": "roll_bar",
+          "repeats": 1
+        },
+        {
+          "pattern": "flick_quad",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "skyline_run",
+          "repeats": 2
+        },
+        {
+          "pattern": "track_sweep",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_quad",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_8ths",
+          "repeats": 2
+        },
+        {
+          "pattern": "skyline_run",
+          "repeats": 2
+        },
+        {
+          "pattern": "skyline_run",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "track_arc",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_8ths",
+          "repeats": 2
+        },
+        {
+          "pattern": "skyline_run",
+          "repeats": 2
+        },
+        {
+          "pattern": "flick_quad",
+          "repeats": 2
+        },
+        {
+          "pattern": "switch_pair",
+          "repeats": 2
+        },
+        {
+          "pattern": "rush_fill",
+          "repeats": 1
+        },
+        {
+          "pattern": "rest",
+          "repeats": 1
+        }
+      ]
+    },
+    {
+      "type": "traversal",
+      "bars": 6.0
+    },
+    {
+      "type": "boss",
+      "room": "helipad",
+      "phases": [
+        {
+          "name": "gun pods",
+          "clear": 0.7,
+          "sections": [
+            {
+              "pattern": "rest",
+              "repeats": 2
+            },
+            {
+              "pattern": "switch_pair",
+              "repeats": 4
+            },
+            {
+              "pattern": "flick_quad",
+              "repeats": 4
+            },
+            {
+              "pattern": "switch_pair",
+              "repeats": 4
+            },
+            {
+              "pattern": "flick_8ths",
+              "repeats": 2
+            },
+            {
+              "pattern": "core_expose",
+              "repeats": 2
+            }
+          ]
+        },
+        {
+          "name": "searchlights",
+          "clear": 0.7,
+          "sections": [
+            {
+              "pattern": "searchlights",
+              "repeats": 4
+            },
+            {
+              "pattern": "micro_walk",
+              "repeats": 2
+            },
+            {
+              "pattern": "track_sweep",
+              "repeats": 2
+            },
+            {
+              "pattern": "micro_zigzag",
+              "repeats": 2
+            },
+            {
+              "pattern": "searchlights",
+              "repeats": 2
+            },
+            {
+              "pattern": "flick_quad",
+              "repeats": 2
+            },
+            {
+              "pattern": "track_arc",
+              "repeats": 2
+            },
+            {
+              "pattern": "flick_lr",
+              "repeats": 2
+            },
+            {
+              "pattern": "switch_pair",
+              "repeats": 2
+            },
+            {
+              "pattern": "micro_walk",
+              "repeats": 2
+            },
+            {
+              "pattern": "flick_8ths",
+              "repeats": 1
+            },
+            {
+              "pattern": "roll_bar",
+              "repeats": 1
+            }
+          ]
+        },
+        {
+          "name": "the core",
+          "clear": 0.8,
+          "sections": [
+            {
+              "pattern": "rush_fill",
+              "repeats": 1
+            },
+            {
+              "pattern": "core_expose",
+              "repeats": 2
+            },
+            {
+              "pattern": "flick_8ths",
+              "repeats": 2
+            },
+            {
+              "pattern": "switch_pair",
+              "repeats": 2
+            },
+            {
+              "pattern": "rush_fill",
+              "repeats": 1
+            },
+            {
+              "pattern": "core_expose",
+              "repeats": 2
+            },
+            {
+              "pattern": "skyline_run",
+              "repeats": 2
+            },
+            {
+              "pattern": "rush_fill",
+              "repeats": 1
+            },
+            {
+              "pattern": "core_expose",
+              "repeats": 2
+            },
+            {
+              "pattern": "rush_fill",
+              "repeats": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "traversal",
+      "bars": 4.0
+    }
+  ],
+  "rooms": [
+    {
+      "name": "rooftop",
+      "size": [
+        34,
+        8,
+        36
+      ],
+      "stand": [
+        0,
+        0,
+        13
+      ],
+      "yaw_deg": 0,
+      "blocks": [
+        {
+          "pos": [
+            -8,
+            1.1,
+            -2
+          ],
+          "size": [
+            4,
+            2.2,
+            3
+          ]
+        },
+        {
+          "pos": [
+            8,
+            1.1,
+            -2
+          ],
+          "size": [
+            4,
+            2.2,
+            3
+          ]
+        },
+        {
+          "pos": [
+            -12,
+            1.75,
+            -10
+          ],
+          "size": [
+            1.5,
+            3.5,
+            1.5
+          ]
+        },
+        {
+          "pos": [
+            12,
+            1.75,
+            -10
+          ],
+          "size": [
+            1.5,
+            3.5,
+            1.5
+          ]
+        },
+        {
+          "pos": [
+            0,
+            0.5,
+            -12
+          ],
+          "size": [
+            10,
+            1,
+            8
+          ]
+        },
+        {
+          "pos": [
+            0,
+            0.6,
+            -17.5
+          ],
+          "size": [
+            34,
+            1.2,
+            0.8
+          ]
+        }
+      ]
+    },
+    {
+      "name": "helipad",
+      "size": [
+        40,
+        12,
+        40
+      ],
+      "stand": [
+        0,
+        0,
+        14
+      ],
+      "yaw_deg": 0,
+      "blocks": [
+        {
+          "pos": [
+            -8,
+            0.25,
+            -6
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ]
+        },
+        {
+          "pos": [
+            8,
+            0.25,
+            -6
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ]
+        },
+        {
+          "pos": [
+            -8,
+            0.25,
+            -16
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ]
+        },
+        {
+          "pos": [
+            8,
+            0.25,
+            -16
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ]
+        },
+        {
+          "pos": [
+            0,
+            5,
+            -19
+          ],
+          "size": [
+            3,
+            10,
+            3
+          ]
+        },
+        {
+          "pos": [
+            -17,
+            4.5,
+            -17
+          ],
+          "size": [
+            0.6,
+            9,
+            0.6
+          ]
+        },
+        {
+          "pos": [
+            17,
+            4.5,
+            -17
+          ],
+          "size": [
+            0.6,
+            9,
+            0.6
+          ]
+        }
+      ]
+    }
+  ],
+  "scaling": {
+    "ref_bpm": 168.0,
+    "radius_exp": 0.0
+  },
+  "patterns": [
+    {
+      "name": "skyline_run",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 0.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": -20,
+            "pitch": 0,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 0.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": -10,
+            "pitch": 4,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 1.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": 0,
+            "pitch": 8,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 1.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 10,
+            "pitch": 12,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": 22,
+            "pitch": 16,
+            "dist": 13
+          },
+          "radius": 0.5,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": -25,
+            "pitch": 6,
+            "dist": 12
+          },
+          "radius": 0.45,
+          "lead": 1.0,
+          "hold": 0.0
+        }
+      ]
+    },
+    {
+      "name": "core_expose",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 0.0,
+          "kind": "switch",
+          "aim": {
+            "yaw": -18,
+            "pitch": 12,
+            "dist": 16
+          },
+          "radius": 0.45,
+          "lead": 1.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 1.0,
+          "kind": "switch",
+          "aim": {
+            "yaw": 18,
+            "pitch": 12,
+            "dist": 16
+          },
+          "radius": 0.45,
+          "lead": 1.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.0,
+          "kind": "flick",
+          "aim": {
+            "yaw": 0,
+            "pitch": 20,
+            "dist": 18
+          },
+          "radius": 0.65,
+          "lead": 1.0,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": -6,
+            "pitch": 24,
+            "dist": 18
+          },
+          "radius": 0.3,
+          "lead": 0.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": 6,
+            "pitch": 24,
+            "dist": 18
+          },
+          "radius": 0.3,
+          "lead": 0.5,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 0,
+            "pitch": 28,
+            "dist": 18
+          },
+          "radius": 0.3,
+          "lead": 0.5,
+          "hold": 0.0
+        }
+      ]
+    },
+    {
+      "name": "searchlights",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 0.0,
+          "kind": "track",
+          "aim": {
+            "yaw": -40,
+            "pitch": 14,
+            "dist": 16
+          },
+          "radius": 0.5,
+          "lead": 1.0,
+          "hold": 1.5,
+          "to": {
+            "yaw": 0,
+            "pitch": 22,
+            "dist": 16
+          }
+        },
+        {
+          "beat": 2.0,
+          "kind": "track",
+          "aim": {
+            "yaw": 40,
+            "pitch": 14,
+            "dist": 16
+          },
+          "radius": 0.5,
+          "lead": 1.0,
+          "hold": 1.5,
+          "to": {
+            "yaw": 0,
+            "pitch": 22,
+            "dist": 16
+          }
+        }
+      ]
+    },
+    {
+      "name": "roll_bar",
+      "length": 4.0,
+      "events": [
+        {
+          "beat": 2.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": -6,
+            "pitch": -2,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 2.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 6,
+            "pitch": -2,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.0,
+          "kind": "micro",
+          "aim": {
+            "yaw": -6,
+            "pitch": 4,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.25,
+          "kind": "micro",
+          "aim": {
+            "yaw": 0,
+            "pitch": 4,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.5,
+          "kind": "micro",
+          "aim": {
+            "yaw": 6,
+            "pitch": 4,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        },
+        {
+          "beat": 3.75,
+          "kind": "micro",
+          "aim": {
+            "yaw": 0,
+            "pitch": 10,
+            "dist": 12
+          },
+          "radius": 0.3,
+          "lead": 0.75,
+          "hold": 0.0
+        }
+      ]
+    }
+  ],
+  "audio": "",
+  "stems": [
+    "res://audio/skyline_base.wav",
+    "res://audio/skyline_perc.wav",
+    "res://audio/skyline_keys.wav",
+    "res://audio/skyline_lead.wav"
+  ],
+  "song_offset_s": 0.0,
+  "kit": {},
+  "cues": [
+    {
+      "bar": 33,
+      "kind": "lights",
+      "room": "rooftop",
+      "bars": 0,
+      "param": 1
+    },
+    {
+      "bar": 55,
+      "kind": "reveal",
+      "room": "helipad",
+      "bars": 2,
+      "param": 1
+    },
+    {
+      "bar": 57,
+      "kind": "lights",
+      "room": "helipad",
+      "bars": 0,
+      "param": 2
+    },
+    {
+      "bar": 73,
+      "kind": "lights",
+      "room": "helipad",
+      "bars": 0,
+      "param": 1
+    },
+    {
+      "bar": 97,
+      "kind": "lights",
+      "room": "helipad",
+      "bars": 0,
+      "param": 3
+    },
+    {
+      "bar": 97,
+      "kind": "shake",
+      "room": "",
+      "bars": 0,
+      "param": 1
+    }
+  ]
+}
