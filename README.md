@@ -1,4 +1,4 @@
-# DOWNBEAT
+          # DOWNBEAT
 
 Cel-shaded cyberpunk FPS rhythm game / aim trainer. Greybox build: the backend is real, every visual is a
 placeholder tracked in `ASSETS.register.md`.
