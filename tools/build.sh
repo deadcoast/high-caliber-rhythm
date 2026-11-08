@@ -15,14 +15,14 @@ for a in "$@"; do case "$a" in
   --test) test=1;;
   --bpm=*) bpm="${a#--bpm=}";;
 esac; done
-echo "[downbeat] cargo ${flags[*]}"
+echo "[highcal_rhythm] cargo ${flags[*]}"
 (cd "$root/core" && cargo "${flags[@]}")
 mkdir -p "$root/godot/bin"
 case "$(uname -s)" in
-  Darwin) cp "$root/core/target/$profile/libdownbeat_core.dylib" "$root/godot/bin/";;
-  *) cp "$root/core/target/$profile/libdownbeat_core.so" "$root/godot/bin/";;
+  Darwin) cp "$root/core/target/$profile/libhighcal_rhythm_core.dylib" "$root/godot/bin/";;
+  *) cp "$root/core/target/$profile/libhighcal_rhythm_core.so" "$root/godot/bin/";;
 esac
-echo "[downbeat] staged godot/bin ($profile)"
+echo "[highcal_rhythm] staged godot/bin ($profile)"
 godot="${GODOT:-godot}"
 if [ "$test" = 1 ] || [ "$smoke" = 1 ]; then
   "$godot" --headless --import --path "$root/godot" >/dev/null 2>&1 || true
@@ -31,16 +31,16 @@ if [ "$test" = 1 ]; then
   "$godot" --headless --path "$root/godot" --script res://tests/run_tests.gd
 fi
 if [ "$smoke" = 1 ]; then
-  echo "[downbeat] smoke: headless autoplay at $bpm BPM"
+  echo "[highcal_rhythm] smoke: headless autoplay at $bpm BPM"
   out="$("$godot" --headless --path "$root/godot" -- --smoke --autoplay "--bpm=$bpm" 2>&1 || true)"
-  line="$(printf '%s\n' "$out" | grep '^DOWNBEAT SMOKE ' | tail -1 || true)"
-  if [ -z "$line" ]; then printf '%s\n' "$out"; echo "[downbeat] smoke: no report line (scene did not finish)"; exit 1; fi
-  printf '%s\n' "${line#DOWNBEAT SMOKE }" | python3 -c '
+  line="$(printf '%s\n' "$out" | grep '^highcal_rhythm SMOKE ' | tail -1 || true)"
+  if [ -z "$line" ]; then printf '%s\n' "$out"; echo "[highcal_rhythm] smoke: no report line (scene did not finish)"; exit 1; fi
+  printf '%s\n' "${line#highcal_rhythm SMOKE }" | python3 -c '
 import json,sys
 r=json.load(sys.stdin)
-print("[downbeat] smoke: grade %s  score %d  hits %d/%d  perfect %d  expired %d  whiffs %d  offset %+.1f ms  sd %.1f ms" % (r["grade"],r["score"],r["hits"],r["shots"],r["perfect"],r["expired"],r["whiffs"],r["timing_mean_ms"],r["timing_std_ms"]))
+print("[highcal_rhythm] smoke: grade %s  score %d  hits %d/%d  perfect %d  expired %d  whiffs %d  offset %+.1f ms  sd %.1f ms" % (r["grade"],r["score"],r["hits"],r["shots"],r["perfect"],r["expired"],r["whiffs"],r["timing_mean_ms"],r["timing_std_ms"]))
 ok = r["expired"]==0 and r["whiffs"]==0 and r["perfect"]>=r["hits"]*0.95
-print("[downbeat] smoke: PASS" if ok else "[downbeat] smoke: FAIL (the bot is exact; a miss is a scene bug)")
+print("[highcal_rhythm] smoke: PASS" if ok else "[highcal_rhythm] smoke: FAIL (the bot is exact; a miss is a scene bug)")
 sys.exit(0 if ok else 1)'
 fi
 if [ "$run" = 1 ]; then "$godot" --path "$root/godot" -- "--bpm=$bpm"; fi

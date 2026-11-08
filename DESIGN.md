@@ -1,4 +1,4 @@
-# DOWNBEAT — Design mechanisms
+# highcal_rhythm — Design mechanisms
 
 Working codename (mine, replace at will). Cel-shaded cyberpunk FPS rhythm game that is an aim trainer.
 The game itself (identity, modes, phases) is in PLAN.md; this file holds the mechanisms under it.

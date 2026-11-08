@@ -1,4 +1,4 @@
-# DOWNBEAT
+# highcal_rhythm
 
 Cel-shaded cyberpunk FPS rhythm game / aim trainer. Greybox build: the backend is real, every visual is a
 placeholder tracked in `ASSETS.register.md`.
@@ -54,7 +54,7 @@ Scores: best run per level and chart fingerprint in `user://scores.cfg` (replay 
 `dbmap song.wav` prints tempo, beat 0 and an onset grid, and writes a level that fills the song's bars.
 Put the audio under `godot/audio/` and pass `--audio res://audio/<file>` (or list `stems` in the JSON:
 they play sample-locked and open by combo tier). Then `.\tools\build.ps1 -Run` with
-`--level=res://levels/<name>.json`. Settings persist in `user://downbeat.cfg`; replays in `user://replays/`.
+`--level=res://levels/<name>.json`. Settings persist in `user://highcal_rhythm.cfg`; replays in `user://replays/`.
 
 ## Levels
 

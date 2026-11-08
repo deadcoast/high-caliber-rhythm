@@ -1,4 +1,4 @@
-# DOWNBEAT — Visual Asset Register
+# highcal_rhythm — Visual Asset Register
 
 Every front-facing visual slot in the build. **VOID** = a placeholder primitive, colour or default font sits
 in the slot today; the backend around the slot is real. Nothing marked VOID ships. When the backend is

@@ -1,4 +1,4 @@
-# DOWNBEAT — Game and production plan
+# highcal_rhythm — Game and production plan
 
 Working codename, mine. One thread, seven phases. Everything below that the brief did not state is
 marked as a call; calls are reversible and noted, not questions.
@@ -24,7 +24,7 @@ Three audiences, one product:
 
 | Kind | Voice | Chart role | Aim skill | Silhouette brief (register TGT-*) |
 |---|---|---|---|---|
-| FLICK | Kick | Downbeats, quarter notes | Click timing | Heavy core, low mass |
+| FLICK | Kick | highcal_rhythms, quarter notes | Click timing | Heavy core, low mass |
 | SWITCH | Snare | 2 and 4, pairs alternating | Target switching | Twin heads, one body |
 | MICRO | Hi-hat | 8ths, small steps | Micro-adjust | Small, bright, chained |
 | TRACK | Cymbal / riser | Swells over bars | Smooth tracking | Long, trailing |

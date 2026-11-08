@@ -13,10 +13,10 @@ use godot::builtin::VarDictionary;
 use godot::classes::RefCounted;
 use godot::prelude::*;
 
-struct DownbeatExtension;
+struct HighCalExtension;
 
 #[gdextension]
-unsafe impl ExtensionLibrary for DownbeatExtension {}
+unsafe impl ExtensionLibrary for HighCalExtension {}
 
 #[derive(GodotClass)]
 #[class(base=RefCounted)]
@@ -169,7 +169,7 @@ impl DbGame {
         match Level::from_json(&json.to_string()) {
             Ok(level) => self.load_level(&level, song_offset_s, input_offset_ms),
             Err(e) => {
-                godot_error!("downbeat: level json: {e}");
+                godot_error!("highcal: level json: {e}");
                 false
             }
         }
@@ -237,14 +237,14 @@ impl DbGame {
         let parsed = match crate::replay::Replay::from_json(&json.to_string()) {
             Ok(r) => r,
             Err(e) => {
-                godot_error!("downbeat: replay json: {e}");
+                godot_error!("highcal: replay json: {e}");
                 return VarDictionary::new();
             }
         };
         match parsed.play() {
             Ok(rep) => report_dict(&rep),
             Err(e) => {
-                godot_error!("downbeat: replay: {e}");
+                godot_error!("highcal: replay: {e}");
                 VarDictionary::new()
             }
         }
@@ -266,7 +266,7 @@ impl DbGame {
                 d.set("bars", a.bars);
                 d.set("duration_s", a.duration_s);
             }
-            Err(e) => godot_error!("downbeat: analyze: {e}"),
+            Err(e) => godot_error!("highcal: analyze: {e}"),
         }
         d
     }
@@ -380,7 +380,7 @@ impl DbGame {
         let level = match Level::from_json(&json.to_string()) {
             Ok(l) => l,
             Err(e) => {
-                godot_error!("downbeat: level json: {e}");
+                godot_error!("highcal: level json: {e}");
                 return d;
             }
         };
@@ -399,7 +399,7 @@ impl DbGame {
                 d.set("audio", level.audio.as_str());
                 d.set("fingerprint", format!("{:016x}", chart.fingerprint()).as_str());
             }
-            Err(e) => godot_error!("downbeat: compile: {e}"),
+            Err(e) => godot_error!("highcal: compile: {e}"),
         }
         d
     }
@@ -490,7 +490,7 @@ impl DbGame {
                 true
             }
             Err(e) => {
-                godot_error!("downbeat: compile: {e}");
+                godot_error!("highcal: compile: {e}");
                 false
             }
         }

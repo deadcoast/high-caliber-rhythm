@@ -1,4 +1,4 @@
-//! DOWNBEAT core: the engine-independent game model.
+//! HIGHCAL core: the engine-independent game model.
 //!
 //! ```text
 //!  stream position ──> Conductor ──> chart time ──> Judge ──> Verdicts ──> Session
